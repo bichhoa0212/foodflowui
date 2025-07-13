@@ -9,6 +9,8 @@ const getSecretKey = (): string => {
 export const generateChecksum = (providerUserId: string, password: string): string => {
   const secretKey = getSecretKey();
   const data = `${providerUserId}${password}${secretKey}`;
+  console.log('🔍 [SECRET KEY] Secret Key:', secretKey);
+  console.log('🔍 [CHECKSUM] Data:', data);
   return crypto.createHash('sha256').update(data).digest('hex');
 };
 

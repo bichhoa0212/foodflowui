@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -28,8 +28,17 @@ import { generateChecksum, validatePhone, validateEmail, saveTokens } from '@/li
 // Schema validation
 const registerSchema = yup.object({
   name: yup.string().required('Vui lòng nhập họ tên'),
-  email: yup.string().email('Email không hợp lệ').required('Vui lòng nhập email'),
-  phone: yup.string().required('Vui lòng nhập số điện thoại'),
+  account: yup
+    .string()
+    .required('Vui lòng nhập tài khoản đăng nhập')
+    .test('email-or-phone', 'Vui lòng nhập email hoặc số điện thoại hợp lệ', function(value) {
+      if (!value) return false;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^[0-9]{10,11}$/;
+      return emailRegex.test(value) || phoneRegex.test(value);
+    }),
+  email: yup.string().email('Email không hợp lệ').optional(),
+  phone: yup.string().matches(/^[0-9]{10,11}$/, 'Số điện thoại không hợp lệ').optional(),
   password: yup.string().min(6, 'Mật khẩu phải có ít nhất 6 ký tự').required('Vui lòng nhập mật khẩu'),
   confirmPassword: yup.string()
     .oneOf([yup.ref('password')], 'Mật khẩu xác nhận không khớp')
@@ -41,8 +50,9 @@ const registerSchema = yup.object({
 
 type RegisterFormData = {
   name: string;
-  email: string;
-  phone: string;
+  account: string;
+  email?: string;
+  phone?: string;
   password: string;
   confirmPassword: string;
   sex: number;
@@ -61,15 +71,19 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [detectedProvider, setDetectedProvider] = useState<'email' | 'phone' | null>(null);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm<RegisterFormData>({
     resolver: yupResolver(registerSchema),
     defaultValues: {
       name: '',
+      account: '',
       email: '',
       phone: '',
       password: '',
@@ -80,39 +94,50 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
     },
   });
 
+  const accountValue = watch('account');
+
+  // Auto-detect provider when account field changes
+  useEffect(() => {
+    if (accountValue) {
+      const provider = validateEmail(accountValue) ? 'email' : validatePhone(accountValue) ? 'phone' : null;
+      setDetectedProvider(provider);
+      
+      // Auto-fill email or phone field based on detected provider
+      if (provider === 'email') {
+        setValue('email', accountValue);
+        setValue('phone', '');
+      } else if (provider === 'phone') {
+        setValue('phone', accountValue);
+        setValue('email', '');
+      }
+    } else {
+      setDetectedProvider(null);
+    }
+  }, [accountValue, setValue]);
+
   const handleRegister = async (data: RegisterFormData) => {
     setLoading(true);
     setError('');
     setSuccess('');
 
     try {
-      // Validate phone number
-      if (!validatePhone(data.phone)) {
-        setError('Số điện thoại không hợp lệ');
-        setLoading(false);
-        return;
-      }
-
-      // Validate email
-      if (!validateEmail(data.email)) {
-        setError('Email không hợp lệ');
-        setLoading(false);
-        return;
-      }
-
-      // Generate checksum
-      const checksum = generateChecksum(data.phone, data.password);
+      // Use the detected provider for the main request
+      const provider = detectedProvider || 'email';
+      const identifier = data.account;
+      
+      // Generate checksum based on detected provider
+      const checksum = generateChecksum(identifier, data.password);
 
       const registerData: RegisterRequest = {
         name: data.name,
-        email: data.email,
-        phone: data.phone,
+        email: data.email || '',
+        phone: data.phone || '',
         password: data.password,
         sex: data.sex,
         address: data.address,
         dateOfBirth: data.dateOfBirth,
-        provider: 'EMAIL',
-        providerUserId: data.email,
+        provider: provider.toUpperCase(),
+        providerUserId: identifier,
         checksum: checksum,
         language: 1,
         deviceName: 'Web Browser',
@@ -137,6 +162,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
     } finally {
       setLoading(false);
     }
+  };
+
+  const getAccountIcon = () => {
+    if (detectedProvider === 'email') return <Email />;
+    if (detectedProvider === 'phone') return <Phone />;
+    return <Person />;
+  };
+
+  const getProviderLabel = () => {
+    if (detectedProvider === 'email') return 'Email';
+    if (detectedProvider === 'phone') return 'Số điện thoại';
+    return 'Tài khoản';
   };
 
   return (
@@ -174,7 +211,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
 
         <Box component="form" onSubmit={handleSubmit(handleRegister)} sx={{ width: '100%' }}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            {/* Họ tên */}
+            <Grid item xs={12}>
               <Controller
                 name="name"
                 control={control}
@@ -182,9 +220,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                   <TextField
                     {...field}
                     fullWidth
-                    label="Họ và tên"
+                    label="Họ tên"
                     variant="outlined"
-                    margin="normal"
                     error={!!errors.name}
                     helperText={errors.name?.message}
                     InputProps={{
@@ -199,6 +236,35 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
               />
             </Grid>
 
+            {/* Tài khoản đăng nhập chính */}
+            <Grid item xs={12}>
+              <Controller
+                name="account"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Tài khoản đăng nhập"
+                    placeholder="Nhập email hoặc số điện thoại"
+                    variant="outlined"
+                    error={!!errors.account}
+                    helperText={errors.account?.message}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          {getAccountIcon()}
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
+        
+
+            {/* Email (tùy chọn) */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="email"
@@ -207,12 +273,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                   <TextField
                     {...field}
                     fullWidth
-                    label="Email"
-                    type="email"
+                    label="Email (tùy chọn)"
+                    placeholder="Nhập email bổ sung (không bắt buộc)"
                     variant="outlined"
-                    margin="normal"
                     error={!!errors.email}
-                    helperText={errors.email?.message}
+                    helperText={errors.email?.message || "Có thể để trống nếu đã nhập ở trên"}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -220,11 +285,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                         </InputAdornment>
                       ),
                     }}
+                    disabled={detectedProvider === 'email'}
                   />
                 )}
               />
             </Grid>
 
+            {/* Số điện thoại (tùy chọn) */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="phone"
@@ -233,12 +300,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                   <TextField
                     {...field}
                     fullWidth
-                    label="Số điện thoại"
+                    label="Số điện thoại (tùy chọn)"
+                    placeholder="Nhập số điện thoại bổ sung (không bắt buộc)"
                     variant="outlined"
-                    margin="normal"
                     error={!!errors.phone}
-                    helperText={errors.phone?.message}
-                    placeholder="VD: 0348236580"
+                    helperText={errors.phone?.message || "Có thể để trống nếu đã nhập ở trên"}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -246,73 +312,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                         </InputAdornment>
                       ),
                     }}
+                    disabled={detectedProvider === 'phone'}
                   />
                 )}
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="sex"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth margin="normal" error={!!errors.sex}>
-                    <InputLabel>Giới tính</InputLabel>
-                    <Select {...field} label="Giới tính">
-                      <MenuItem value={1}>Nam</MenuItem>
-                      <MenuItem value={0}>Nữ</MenuItem>
-                      <MenuItem value={2}>Khác</MenuItem>
-                    </Select>
-                    {errors.sex && (
-                      <FormHelperText>{errors.sex.message}</FormHelperText>
-                    )}
-                  </FormControl>
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12}>
-              <Controller
-                name="address"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Địa chỉ"
-                    variant="outlined"
-                    margin="normal"
-                    error={!!errors.address}
-                    helperText={errors.address?.message}
-                    multiline
-                    rows={2}
-                  />
-                )}
-              />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="dateOfBirth"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Ngày sinh"
-                    type="date"
-                    variant="outlined"
-                    margin="normal"
-                    error={!!errors.dateOfBirth}
-                    helperText={errors.dateOfBirth?.message}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-
+            {/* Mật khẩu */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="password"
@@ -324,7 +330,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                     label="Mật khẩu"
                     type={showPassword ? 'text' : 'password'}
                     variant="outlined"
-                    margin="normal"
                     error={!!errors.password}
                     helperText={errors.password?.message}
                     InputProps={{
@@ -344,6 +349,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
               />
             </Grid>
 
+            {/* Xác nhận mật khẩu */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="confirmPassword"
@@ -355,7 +361,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                     label="Xác nhận mật khẩu"
                     type={showConfirmPassword ? 'text' : 'password'}
                     variant="outlined"
-                    margin="normal"
                     error={!!errors.confirmPassword}
                     helperText={errors.confirmPassword?.message}
                     InputProps={{
@@ -374,6 +379,65 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
                 )}
               />
             </Grid>
+
+            {/* Giới tính */}
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="sex"
+                control={control}
+                render={({ field }) => (
+                  <FormControl fullWidth error={!!errors.sex}>
+                    <InputLabel>Giới tính</InputLabel>
+                    <Select {...field} label="Giới tính">
+                      <MenuItem value={1}>Nam</MenuItem>
+                      <MenuItem value={2}>Nữ</MenuItem>
+                      <MenuItem value={3}>Khác</MenuItem>
+                    </Select>
+                    {errors.sex && <FormHelperText>{errors.sex.message}</FormHelperText>}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+
+            {/* Ngày sinh */}
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="dateOfBirth"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Ngày sinh"
+                    type="date"
+                    variant="outlined"
+                    error={!!errors.dateOfBirth}
+                    helperText={errors.dateOfBirth?.message}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Địa chỉ */}
+            <Grid item xs={12}>
+              <Controller
+                name="address"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Địa chỉ"
+                    variant="outlined"
+                    error={!!errors.address}
+                    helperText={errors.address?.message}
+                  />
+                )}
+              />
+            </Grid>
           </Grid>
 
           <Button
@@ -381,7 +445,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            disabled={loading}
+            disabled={loading || !detectedProvider}
           >
             {loading ? 'Đang đăng ký...' : 'Đăng ký'}
           </Button>

@@ -123,4 +123,40 @@ export const validateLoginData = (data: any) => {
   console.groupEnd();
   
   return missing.length === 0;
+};
+
+export const validateRegisterData = (data: any) => {
+  console.group('🔍 [REGISTER DATA VALIDATION]');
+  
+  const required = ['name', 'email', 'phone', 'password', 'provider', 'providerUserId'];
+  const missing = required.filter(field => !data[field]);
+  
+  if (missing.length > 0) {
+    console.error('❌ Missing required fields:', missing);
+  } else {
+    console.log('✅ All required fields present');
+  }
+  
+  console.log('Data structure:', {
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    password: data.password ? '[HIDDEN]' : undefined,
+    provider: data.provider,
+    providerUserId: data.providerUserId,
+    checksum: data.checksum ? '[PRESENT]' : undefined,
+    language: data.language,
+  });
+  
+  console.log('Provider detection:', {
+    email: data.email,
+    phone: data.phone,
+    detectedProvider: data.provider,
+    isValidEmail: data.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email),
+    isValidPhone: data.phone && /^(0|\+84)(3[2-9]|5[689]|7[06-9]|8[1-689]|9[0-46-9])[0-9]{7}$/.test(data.phone),
+  });
+  
+  console.groupEnd();
+  
+  return missing.length === 0;
 }; 

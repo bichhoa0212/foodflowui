@@ -19,11 +19,11 @@ import {
 } from '@mui/material';
 import { authAPI } from '@/lib/api';
 import { generateChecksum, generateSimpleChecksum, validateEmail, validatePhone } from '@/lib/utils';
-import { testBackendConnection, checkCORS, validateLoginData } from '@/lib/debug';
+import { testBackendConnection, checkCORS, validateLoginData, validateRegisterData } from '@/lib/debug';
 
 const TestAPI = () => {
   const [loginData, setLoginData] = useState({
-    providerUserId: '0348236580',
+    account: '0348236580',
     password: '123456',
   });
   
@@ -55,14 +55,14 @@ const TestAPI = () => {
   const handleTestLogin = async () => {
     setLoading('login');
     try {
-      const detectedProvider = detectProvider(loginData.providerUserId);
+      const detectedProvider = detectProvider(loginData.account);
       const checksum = useSecretKey 
-        ? generateChecksum(loginData.providerUserId, loginData.password)
-        : generateSimpleChecksum(loginData.providerUserId, loginData.password);
+        ? generateChecksum(loginData.account, loginData.password)
+        : generateSimpleChecksum(loginData.account, loginData.password);
       
       const data = {
         provider: detectedProvider,
-        providerUserId: loginData.providerUserId,
+        providerUserId: loginData.account,
         password: loginData.password,
         checksum,
         language: 1,
@@ -83,20 +83,26 @@ const TestAPI = () => {
   const handleTestRegister = async () => {
     setLoading('register');
     try {
+      const testAccount = 'test@example.com'; // Có thể thay đổi thành số điện thoại
+      const detectedProvider = detectProvider(testAccount);
+      
       const registerData = {
         name: 'Test User',
-        email: 'test@example.com',
-        phone: '0348236580',
+        email: detectedProvider === 'EMAIL' ? testAccount : '',
+        phone: detectedProvider === 'PHONE' ? testAccount : '',
         password: '123456',
         sex: 1,
         address: 'Test Address',
         dateOfBirth: '1990-01-01',
-        provider: 'EMAIL',
-        providerUserId: 'test@example.com',
-        checksum: generateChecksum('0348236580', '123456'),
+        provider: detectedProvider,
+        providerUserId: testAccount,
+        checksum: generateChecksum(testAccount, '123456'),
         language: 1,
         deviceName: 'Test Browser',
       };
+      
+      // Validate data before sending
+      validateRegisterData(registerData);
       
       const response = await authAPI.register(registerData);
       addResult('Register Test', response.data);
@@ -135,10 +141,10 @@ const TestAPI = () => {
   const handleGenerateChecksum = async () => {
     setLoading('checksum');
     try {
-      const detectedProvider = detectProvider(loginData.providerUserId);
+      const detectedProvider = detectProvider(loginData.account);
       const data = {
         provider: detectedProvider,
-        providerUserId: loginData.providerUserId,
+        providerUserId: loginData.account,
         password: loginData.password,
         language: 1,
       };
@@ -205,7 +211,7 @@ const TestAPI = () => {
           <FormControl sx={{ minWidth: 120 }}>
             <InputLabel>Detected Provider</InputLabel>
             <Select
-              value={detectProvider(loginData.providerUserId)}
+              value={detectProvider(loginData.account)}
               label="Detected Provider"
               disabled
             >
@@ -215,9 +221,9 @@ const TestAPI = () => {
           </FormControl>
           
           <TextField
-            label="User ID"
-            value={loginData.providerUserId}
-            onChange={(e) => setLoginData(prev => ({ ...prev, providerUserId: e.target.value }))}
+            label="Tài khoản đăng nhập"
+            value={loginData.account}
+            onChange={(e) => setLoginData(prev => ({ ...prev, account: e.target.value }))}
             placeholder="0348236580 hoặc test@example.com"
           />
           
