@@ -1,103 +1,327 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useEffect, useState } from 'react';
+import {
+  Box,
+  Container,
+  Typography,
+  Button,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Menu,
+  MenuItem,
+  Avatar,
+} from '@mui/material';
+import {
+  Restaurant,
+  DeliveryDining,
+  ShoppingCart,
+  Person,
+  ExitToApp,
+  Login,
+  PersonAdd,
+} from '@mui/icons-material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { useRouter } from 'next/navigation';
+import { isAuthenticated, getUserInfo, clearTokens } from '@/lib/utils';
+
+// Tạo theme Material-UI
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
+});
+
+const HomePage = () => {
+  const router = useRouter();
+  const [authenticated, setAuthenticated] = useState(false);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      const isAuth = isAuthenticated();
+      setAuthenticated(isAuth);
+      if (isAuth) {
+        setUserInfo(getUserInfo());
+      }
+    };
+
+    checkAuth();
+    // Kiểm tra lại khi window focus
+    window.addEventListener('focus', checkAuth);
+    return () => window.removeEventListener('focus', checkAuth);
+  }, []);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    clearTokens();
+    setAuthenticated(false);
+    setUserInfo(null);
+    handleMenuClose();
+    router.push('/login');
+  };
+
+  const features = [
+    {
+      icon: <Restaurant sx={{ fontSize: 40 }} />,
+      title: 'Nhà hàng đa dạng',
+      description: 'Khám phá hàng nghìn nhà hàng với menu phong phú từ ẩm thực Việt Nam đến quốc tế.',
+    },
+    {
+      icon: <DeliveryDining sx={{ fontSize: 40 }} />,
+      title: 'Giao hàng nhanh chóng',
+      description: 'Đặt hàng và nhận món ăn tại nhà trong thời gian ngắn nhất với đội ngũ giao hàng chuyên nghiệp.',
+    },
+    {
+      icon: <ShoppingCart sx={{ fontSize: 40 }} />,
+      title: 'Đặt hàng dễ dàng',
+      description: 'Giao diện thân thiện, đặt hàng chỉ với vài cú click chuột.',
+    },
+  ];
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{ flexGrow: 1 }}>
+        {/* Header */}
+        <AppBar position="static">
+          <Toolbar>
+            <Restaurant sx={{ mr: 2 }} />
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              FoodFlow
+            </Typography>
+            
+            {authenticated ? (
+              <>
+                <IconButton
+                  size="large"
+                  onClick={handleMenuOpen}
+                  color="inherit"
+                >
+                  <Avatar sx={{ width: 32, height: 32 }}>
+                    <Person />
+                  </Avatar>
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                >
+                  <MenuItem onClick={handleMenuClose}>
+                    <Person sx={{ mr: 1 }} />
+                    {userInfo?.name || 'User'}
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    <ExitToApp sx={{ mr: 1 }} />
+                    Đăng xuất
+                  </MenuItem>
+                </Menu>
+              </>
+            ) : (
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  color="inherit"
+                  startIcon={<Login />}
+                  onClick={() => router.push('/login')}
+                >
+                  Đăng nhập
+                </Button>
+                <Button
+                  color="inherit"
+                  startIcon={<PersonAdd />}
+                  onClick={() => router.push('/register')}
+                >
+                  Đăng ký
+                </Button>
+              </Box>
+            )}
+          </Toolbar>
+        </AppBar>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Hero Section */}
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: 'white',
+            py: 8,
+          }}
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <Container maxWidth="lg">
+            <Grid container spacing={4} alignItems="center">
+              <Grid item xs={12} md={6}>
+                <Typography variant="h2" component="h1" gutterBottom>
+                  Chào mừng đến với FoodFlow
+                </Typography>
+                <Typography variant="h5" component="h2" gutterBottom>
+                  Nền tảng đặt đồ ăn trực tuyến hàng đầu Việt Nam
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  Khám phá hàng nghìn món ăn ngon từ các nhà hàng uy tín và nhận giao hàng tận nơi trong thời gian ngắn nhất.
+                </Typography>
+                {!authenticated && (
+                  <Box sx={{ mt: 3 }}>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      sx={{ mr: 2, mb: 2 }}
+                      onClick={() => router.push('/register')}
+                    >
+                      Bắt đầu ngay
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="large"
+                      sx={{ color: 'white', borderColor: 'white', mb: 2 }}
+                      onClick={() => router.push('/login')}
+                    >
+                      Đăng nhập
+                    </Button>
+                  </Box>
+                )}
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: 300,
+                  }}
+                >
+                  <Restaurant sx={{ fontSize: 200, opacity: 0.3 }} />
+                </Box>
+              </Grid>
+            </Grid>
+          </Container>
+        </Box>
+
+        {/* Features Section */}
+        <Container maxWidth="lg" sx={{ py: 8 }}>
+          <Typography variant="h3" component="h2" textAlign="center" gutterBottom>
+            Tại sao chọn FoodFlow?
+          </Typography>
+          <Grid container spacing={4} sx={{ mt: 4 }}>
+            {features.map((feature, index) => (
+              <Grid item xs={12} md={4} key={index}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    textAlign: 'center',
+                    p: 2,
+                  }}
+                >
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Box sx={{ color: 'primary.main', mb: 2 }}>
+                      {feature.icon}
+                    </Box>
+                    <Typography gutterBottom variant="h5" component="h3">
+                      {feature.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {feature.description}
+                    </Typography>
+                  </CardContent>
+                  <CardActions sx={{ justifyContent: 'center' }}>
+                    <Button size="small" color="primary">
+                      Tìm hiểu thêm
+                    </Button>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+
+        {/* Footer */}
+        <Box
+          component="footer"
+          sx={{
+            bgcolor: 'grey.900',
+            color: 'white',
+            py: 6,
+            mt: 'auto',
+          }}
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <Container maxWidth="lg">
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={4}>
+                <Typography variant="h6" gutterBottom>
+                  FoodFlow
+                </Typography>
+                <Typography variant="body2">
+                  Nền tảng đặt đồ ăn trực tuyến hàng đầu Việt Nam, kết nối người dùng với hàng nghìn nhà hàng uy tín.
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Typography variant="h6" gutterBottom>
+                  Liên kết
+                </Typography>
+                <Typography variant="body2" component="div">
+                  <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
+                    <Box component="li" sx={{ mb: 1 }}>
+                      <Button color="inherit" sx={{ p: 0, textTransform: 'none' }}>
+                        Về chúng tôi
+                      </Button>
+                    </Box>
+                    <Box component="li" sx={{ mb: 1 }}>
+                      <Button color="inherit" sx={{ p: 0, textTransform: 'none' }}>
+                        Điều khoản sử dụng
+                      </Button>
+                    </Box>
+                    <Box component="li" sx={{ mb: 1 }}>
+                      <Button color="inherit" sx={{ p: 0, textTransform: 'none' }}>
+                        Chính sách bảo mật
+                      </Button>
+                    </Box>
+                  </Box>
+                </Typography>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Typography variant="h6" gutterBottom>
+                  Liên hệ
+                </Typography>
+                <Typography variant="body2">
+                  Email: support@foodflow.com<br />
+                  Hotline: 1900-xxxx<br />
+                  Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM
+                </Typography>
+              </Grid>
+            </Grid>
+            <Box sx={{ borderTop: 1, borderColor: 'grey.800', pt: 3, mt: 3, textAlign: 'center' }}>
+              <Typography variant="body2" color="grey.400">
+                © 2024 FoodFlow. Tất cả quyền được bảo lưu.
+              </Typography>
+            </Box>
+          </Container>
+        </Box>
+      </Box>
+    </ThemeProvider>
   );
-}
+};
+
+export default HomePage;
