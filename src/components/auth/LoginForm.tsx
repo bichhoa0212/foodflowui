@@ -21,7 +21,7 @@ import { Visibility, VisibilityOff, Phone, Email } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { authAPI, AuthRequest } from '@/lib/api';
+import { authAPI, AuthRequest } from '@/lib/authApi';
 import { generateChecksum, validatePhone, validateEmail, saveTokens } from '@/lib/utils';
 
 // Schema validation

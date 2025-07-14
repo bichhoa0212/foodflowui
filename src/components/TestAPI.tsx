@@ -17,7 +17,7 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import { authAPI } from '@/lib/api';
+import { authAPI, RegisterRequest, AuthRequest, AuthResponse, RefreshTokenRequest } from '@/lib/authApi';
 import { generateChecksum, generateSimpleChecksum, validateEmail, validatePhone } from '@/lib/utils';
 import { testBackendConnection, checkCORS, validateLoginData, validateRegisterData } from '@/lib/debug';
 

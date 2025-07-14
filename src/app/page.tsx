@@ -17,6 +17,12 @@ import {
   Menu,
   MenuItem,
   Avatar,
+  Select,
+  MenuItem as MuiMenuItem,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+  TextField,
 } from '@mui/material';
 import {
   Restaurant,
@@ -31,6 +37,12 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useRouter } from 'next/navigation';
 import { isAuthenticated, getUserInfo, clearTokens } from '@/lib/utils';
+import axios from 'axios';
+import ProductFilterBar from '@/components/ProductFilterBar';
+import ProductList from '@/components/ProductList';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
+import { productAPI } from '@/lib/productApi';
 
 // Tạo theme Material-UI
 const theme = createTheme({
@@ -52,6 +64,17 @@ const HomePage = () => {
   const [authenticated, setAuthenticated] = useState(false);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [sort, setSort] = useState('price_asc');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [products, setProducts] = useState<any[]>([]);
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     const checkAuth = () => {
@@ -67,6 +90,32 @@ const HomePage = () => {
     window.addEventListener('focus', checkAuth);
     return () => window.removeEventListener('focus', checkAuth);
   }, []);
+
+  useEffect(() => {
+    productAPI.getCategories({ page: 0, size: 50 })
+      .then(res => setCategories(res.data.data.data || res.data.data.content || []));
+  }, []);
+
+  const fetchProducts = () => {
+    setLoading(true);
+    productAPI.getProducts({
+      page,
+      size,
+      categoryId: selectedCategory,
+      sort,
+      minPrice,
+      maxPrice,
+      name: search,
+    })
+      .then(res => {
+        const d = res.data.data;
+        setProducts(d.data || []);
+        setTotal(d.total || 0);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchProducts(); }, [selectedCategory, sort, minPrice, maxPrice, page, size, search]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -106,61 +155,15 @@ const HomePage = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ flexGrow: 1 }}>
-        {/* Header */}
-        <AppBar position="static">
-          <Toolbar>
-            <Restaurant sx={{ mr: 2 }} />
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              FoodFlow
-            </Typography>
-            
-            {authenticated ? (
-              <>
-                <IconButton
-                  size="large"
-                  onClick={handleMenuOpen}
-                  color="inherit"
-                >
-                  <Avatar sx={{ width: 32, height: 32 }}>
-                    <Person />
-                  </Avatar>
-                </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                >
-                  <MenuItem onClick={handleMenuClose}>
-                    <Person sx={{ mr: 1 }} />
-                    {userInfo?.name || 'User'}
-                  </MenuItem>
-                  <MenuItem onClick={handleLogout}>
-                    <ExitToApp sx={{ mr: 1 }} />
-                    Đăng xuất
-                  </MenuItem>
-                </Menu>
-              </>
-            ) : (
-              <Box sx={{ display: 'flex', gap: 1 }}>
-                <Button
-                  color="inherit"
-                  startIcon={<Login />}
-                  onClick={() => router.push('/login')}
-                >
-                  Đăng nhập
-                </Button>
-                <Button
-                  color="inherit"
-                  startIcon={<PersonAdd />}
-                  onClick={() => router.push('/register')}
-                >
-                  Đăng ký
-                </Button>
-              </Box>
-            )}
-          </Toolbar>
-        </AppBar>
-
+        <Header
+          authenticated={authenticated}
+          userInfo={userInfo}
+          anchorEl={anchorEl}
+          handleMenuOpen={handleMenuOpen}
+          handleMenuClose={handleMenuClose}
+          handleLogout={handleLogout}
+          router={router}
+        />
         {/* Hero Section */}
         <Box
           sx={{
@@ -257,68 +260,34 @@ const HomePage = () => {
           </Grid>
         </Container>
 
-        {/* Footer */}
-        <Box
-          component="footer"
-          sx={{
-            bgcolor: 'grey.900',
-            color: 'white',
-            py: 6,
-            mt: 'auto',
-          }}
-        >
-          <Container maxWidth="lg">
-            <Grid container spacing={4}>
-              <Grid item xs={12} md={4}>
-                <Typography variant="h6" gutterBottom>
-                  FoodFlow
-                </Typography>
-                <Typography variant="body2">
-                  Nền tảng đặt đồ ăn trực tuyến hàng đầu Việt Nam, kết nối người dùng với hàng nghìn nhà hàng uy tín.
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="h6" gutterBottom>
-                  Liên kết
-                </Typography>
-                <Typography variant="body2" component="div">
-                  <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
-                    <Box component="li" sx={{ mb: 1 }}>
-                      <Button color="inherit" sx={{ p: 0, textTransform: 'none' }}>
-                        Về chúng tôi
-                      </Button>
-                    </Box>
-                    <Box component="li" sx={{ mb: 1 }}>
-                      <Button color="inherit" sx={{ p: 0, textTransform: 'none' }}>
-                        Điều khoản sử dụng
-                      </Button>
-                    </Box>
-                    <Box component="li" sx={{ mb: 1 }}>
-                      <Button color="inherit" sx={{ p: 0, textTransform: 'none' }}>
-                        Chính sách bảo mật
-                      </Button>
-                    </Box>
-                  </Box>
-                </Typography>
-              </Grid>
-              <Grid item xs={12} md={4}>
-                <Typography variant="h6" gutterBottom>
-                  Liên hệ
-                </Typography>
-                <Typography variant="body2">
-                  Email: support@foodflow.com<br />
-                  Hotline: 1900-xxxx<br />
-                  Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM
-                </Typography>
-              </Grid>
-            </Grid>
-            <Box sx={{ borderTop: 1, borderColor: 'grey.800', pt: 3, mt: 3, textAlign: 'center' }}>
-              <Typography variant="body2" color="grey.400">
-                © 2024 FoodFlow. Tất cả quyền được bảo lưu.
-              </Typography>
-            </Box>
-          </Container>
-        </Box>
+        {/* Filter + Product List Section */}
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <ProductFilterBar
+            categories={categories}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            sort={sort}
+            setSort={setSort}
+            minPrice={minPrice}
+            setMinPrice={setMinPrice}
+            maxPrice={maxPrice}
+            setMaxPrice={setMaxPrice}
+            search={search}
+            setSearch={setSearch}
+            onSearch={() => { setPage(0); fetchProducts(); }}
+          />
+          <Box sx={{ mt: 4 }}>
+            <ProductList
+              products={products}
+              loading={loading}
+              page={page}
+              size={size}
+              total={total}
+              setPage={setPage}
+            />
+          </Box>
+        </Container>
+        <Footer />
       </Box>
     </ThemeProvider>
   );

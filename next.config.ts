@@ -1,13 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbo: {
-      rules: {
-        "*.svg": {
-          loaders: ["@svgr/webpack"],
-          as: "*.js",
-        },
+  turbopack: {
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
       },
     },
   },
@@ -18,14 +16,33 @@ const nextConfig: NextConfig = {
     });
     return config;
   },
+  // Thêm custom basePath nếu muốn deploy app ở subpath (ví dụ: /myapp)
+  // basePath: '/myapp',
+
+  // Thêm custom rewrites cho route FE nếu muốn
+  // async rewrites() {
+  //   return [
+  //     { source: '/san-pham/:id', destination: '/product/:id' }, // /san-pham/4 sẽ map tới /product/4
+  //     // ...các rewrites khác
+  //   ];
+  // },
   async rewrites() {
     return [
+      // Custom FE rewrite: /san-pham/4 => /product/4
+      { source: '/san-pham/:id', destination: '/product/:id' },
+      // API rewrite (giữ lại)
       {
         source: "/api/:path*",
         destination: "http://localhost:8080/api/:path*",
       },
     ];
   },
+  // Cho phép truy cập dev từ các IP mạng LAN (fix Cross origin request detected)
+  allowedDevOrigins: [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'http://192.168.21.26:3000',
+  ],
   env: {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api",
     APP_SECRET_KEY: process.env.APP_SECRET_KEY || "793ddabd7c83070cd1ac72877edd9d29",

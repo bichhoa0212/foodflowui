@@ -22,7 +22,7 @@ import { Visibility, VisibilityOff, Phone, Email, Person } from '@mui/icons-mate
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { authAPI, RegisterRequest } from '@/lib/api';
+import { authAPI, RegisterRequest } from '@/lib/authApi';
 import { generateChecksum, validatePhone, validateEmail, saveTokens } from '@/lib/utils';
 
 // Schema validation
