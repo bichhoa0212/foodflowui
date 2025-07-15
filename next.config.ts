@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 
+/** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
   turbopack: {
     rules: {
@@ -38,13 +39,10 @@ const nextConfig: NextConfig = {
     ];
   },
   // Cho phép truy cập dev từ các IP mạng LAN (fix Cross origin request detected)
-  allowedDevOrigins: [
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://192.168.21.26:3000',
-  ],
+
+  allowedDevOrigins: ['*','192.168.21.26', '*.local-origin.dev'],
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api",
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://192.168.21.26:8080/api",
     APP_SECRET_KEY: process.env.APP_SECRET_KEY || "793ddabd7c83070cd1ac72877edd9d29",
     JWT_SECRET: process.env.JWT_SECRET || "793ddabd7c83070cd1ac72877edd9d29",
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "793ddabd7c83070cd1ac72877edd9d29",

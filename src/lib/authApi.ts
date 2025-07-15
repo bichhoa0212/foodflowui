@@ -1,12 +1,10 @@
 "use client";
 
 import axios from 'axios';
+import { createApiInstance } from './baseApi';
 
-const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 10000,
-});
+const api = createApiInstance();
+
 
 api.interceptors.request.use(
   (config) => {

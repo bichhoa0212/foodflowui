@@ -2,10 +2,11 @@ import axios, { AxiosInstance } from 'axios';
 
 export function createApiInstance(): AxiosInstance {
   const api = axios.create({
-    baseURL: 'http://localhost:8080/api',
+    baseURL: process.env.NEXT_PUBLIC_API_URL, // <-- lấy từ biến môi trường
     headers: { 'Content-Type': 'application/json' },
     timeout: 10000,
   });
+
 
   api.interceptors.request.use(
     (config) => {

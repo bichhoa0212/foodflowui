@@ -1,7 +1,7 @@
 // Debug utilities for API testing
 
 export const debugConfig = {
-  backendUrl: 'http://localhost:8080/api',
+  backendUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
   timeout: 10000,
 };
 
