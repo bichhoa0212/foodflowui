@@ -25,6 +25,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { productAPI } from '@/lib/productApi';
 import { restaurantAPI } from '@/lib/restaurantApi';
+import {publicAPI} from "@/lib/publicApi";
 
 // Tạo theme Material-UI
 const theme = createTheme({
@@ -60,7 +61,7 @@ const HomePage = () => {
   const [topReviewedRestaurants, setTopReviewedRestaurants] = useState<any[]>([]);
 
   useEffect(() => {
-    restaurantAPI.getCategories({ page: 0, size: 50 })
+    publicAPI.getCategories({ page: 0, size: 50 })
       .then(res => setCategories(res.data.data.data || res.data.data.content || []));
     productAPI.getTopPurchasedProducts().then(res => setTopProducts(res.data.data || []));
     restaurantAPI.getTopPurchasedRestaurants().then(res => setTopRestaurants(res.data.data || []));
@@ -70,7 +71,7 @@ const HomePage = () => {
 
   const fetchProducts = () => {
     setLoading(true);
-    productAPI.getProducts({
+    publicAPI.getProducts({
       page,
       size,
       categoryId: selectedCategory,
