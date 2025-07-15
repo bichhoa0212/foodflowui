@@ -1,7 +1,9 @@
+"use client";
+
 import React from 'react';
 import { Grid, Card, CardContent, Typography, CircularProgress, Box, Button } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { isAuthenticated } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ProductListProps {
   products: any[];
@@ -14,14 +16,18 @@ interface ProductListProps {
 
 const ProductList: React.FC<ProductListProps> = ({ products, loading, page, size, total, setPage }) => {
   const router = useRouter();
+  const { authenticated } = useAuth();
+  
   const handleCardClick = (id: number) => {
-    if (isAuthenticated()) {
+    if (authenticated) {
       router.push(`/product/${id}`);
     } else {
       router.push(`/login?redirect=/product/${id}`);
     }
   };
+  
   if (loading) return <CircularProgress />;
+  
   return (
     <>
       <Grid container spacing={2}>

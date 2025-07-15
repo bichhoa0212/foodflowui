@@ -5,7 +5,7 @@ import { Box, Container, Paper, Typography } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import RegisterForm from '@/components/auth/RegisterForm';
-import { isAuthenticated } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
 // Tạo theme Material-UI
@@ -25,13 +25,14 @@ const theme = createTheme({
 
 const RegisterPage = () => {
   const router = useRouter();
+  const { authenticated, loading } = useAuth();
 
   useEffect(() => {
     // Kiểm tra nếu user đã đăng nhập thì redirect về trang chủ
-    if (isAuthenticated()) {
+    if (!loading && authenticated) {
       router.push('/');
     }
-  }, [router]);
+  }, [authenticated, loading, router]);
 
   const handleRegisterSuccess = () => {
     router.push('/');
@@ -40,6 +41,28 @@ const RegisterPage = () => {
   const handleSwitchToLogin = () => {
     router.push('/login');
   };
+
+  // Hiển thị loading nếu đang kiểm tra authentication
+  if (loading) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Box
+          sx={{
+            minHeight: '100vh',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Typography variant="h6" color="white">
+            Đang kiểm tra...
+          </Typography>
+        </Box>
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>

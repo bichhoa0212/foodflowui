@@ -1,3 +1,5 @@
+"use client";
+
 import axios from 'axios';
 
 // Tạo instance axios với base URL

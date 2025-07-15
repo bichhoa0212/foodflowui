@@ -21,8 +21,9 @@ import { Visibility, VisibilityOff, Phone, Email } from '@mui/icons-material';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { authAPI, AuthRequest } from '@/lib/authApi';
-import { generateChecksum, validatePhone, validateEmail, saveTokens } from '@/lib/utils';
+import { AuthRequest } from '@/lib/authApi';
+import { generateChecksum, validatePhone, validateEmail } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Schema validation
 const loginSchema = yup.object({
@@ -42,9 +43,9 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const { login, loading } = useAuth();
 
   const {
     control,
@@ -72,7 +73,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
   };
 
   const handleLogin = async (data: LoginFormData) => {
-    setLoading(true);
     setError('');
     setSuccess('');
 
@@ -83,13 +83,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
       // Validate input based on detected provider
       if (detectedProvider === 'PHONE' && !validatePhone(data.providerUserId)) {
         setError('Số điện thoại không hợp lệ');
-        setLoading(false);
         return;
       }
 
       if (detectedProvider === 'EMAIL' && !validateEmail(data.providerUserId)) {
         setError('Email không hợp lệ');
-        setLoading(false);
         return;
       }
 
@@ -104,24 +102,21 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
         language: 1,
       };
 
-      const response = await authAPI.login(loginData);
-      const { accessToken, refreshToken, userInfo } = response.data;
-
-      // Lưu token
-      saveTokens(accessToken, refreshToken);
-
-      setSuccess('Đăng nhập thành công!');
+      const success = await login(loginData);
       
-      // Redirect sau 1 giây
-      setTimeout(() => {
-        onSuccess?.();
-      }, 1000);
+      if (success) {
+        setSuccess('Đăng nhập thành công!');
+        // Redirect sau 1 giây
+        setTimeout(() => {
+          onSuccess?.();
+        }, 1000);
+      } else {
+        setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+      }
 
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng thử lại.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -199,6 +194,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
+                        aria-label="toggle password visibility"
                         onClick={() => setShowPassword(!showPassword)}
                         edge="end"
                       >

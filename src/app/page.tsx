@@ -6,43 +6,24 @@ import {
   Container,
   Typography,
   Button,
-  Paper,
   Grid,
   Card,
   CardContent,
   CardActions,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Menu,
-  MenuItem,
-  Avatar,
-  Select,
-  MenuItem as MuiMenuItem,
-  FormControl,
-  InputLabel,
-  CircularProgress,
-  TextField,
 } from '@mui/material';
 import {
   Restaurant,
   DeliveryDining,
   ShoppingCart,
-  Person,
-  ExitToApp,
-  Login,
-  PersonAdd,
 } from '@mui/icons-material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useRouter } from 'next/navigation';
-import { isAuthenticated, getUserInfo, clearTokens } from '@/lib/utils';
-import axios from 'axios';
 import ProductFilterBar from '@/components/ProductFilterBar';
 import ProductList from '@/components/ProductList';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { productAPI } from '@/lib/productApi';
+import { publicAPI } from '@/lib/publicApi';
 
 // Tạo theme Material-UI
 const theme = createTheme({
@@ -61,9 +42,6 @@ const theme = createTheme({
 
 const HomePage = () => {
   const router = useRouter();
-  const [authenticated, setAuthenticated] = useState(false);
-  const [userInfo, setUserInfo] = useState<any>(null);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sort, setSort] = useState('price_asc');
@@ -77,28 +55,13 @@ const HomePage = () => {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    const checkAuth = () => {
-      const isAuth = isAuthenticated();
-      setAuthenticated(isAuth);
-      if (isAuth) {
-        setUserInfo(getUserInfo());
-      }
-    };
-
-    checkAuth();
-    // Kiểm tra lại khi window focus
-    window.addEventListener('focus', checkAuth);
-    return () => window.removeEventListener('focus', checkAuth);
-  }, []);
-
-  useEffect(() => {
-    productAPI.getCategories({ page: 0, size: 50 })
+    publicAPI.getCategories({ page: 0, size: 50 })
       .then(res => setCategories(res.data.data.data || res.data.data.content || []));
   }, []);
 
   const fetchProducts = () => {
     setLoading(true);
-    productAPI.getProducts({
+    publicAPI.getProducts({
       page,
       size,
       categoryId: selectedCategory,
@@ -116,22 +79,6 @@ const HomePage = () => {
   };
 
   useEffect(() => { fetchProducts(); }, [selectedCategory, sort, minPrice, maxPrice, page, size, search]);
-
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    clearTokens();
-    setAuthenticated(false);
-    setUserInfo(null);
-    handleMenuClose();
-    router.push('/login');
-  };
 
   const features = [
     {
@@ -155,15 +102,7 @@ const HomePage = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Box sx={{ flexGrow: 1 }}>
-        <Header
-          authenticated={authenticated}
-          userInfo={userInfo}
-          anchorEl={anchorEl}
-          handleMenuOpen={handleMenuOpen}
-          handleMenuClose={handleMenuClose}
-          handleLogout={handleLogout}
-          router={router}
-        />
+        <Header />
         {/* Hero Section */}
         <Box
           sx={{
@@ -184,26 +123,24 @@ const HomePage = () => {
                 <Typography variant="body1" paragraph>
                   Khám phá hàng nghìn món ăn ngon từ các nhà hàng uy tín và nhận giao hàng tận nơi trong thời gian ngắn nhất.
                 </Typography>
-                {!authenticated && (
-                  <Box sx={{ mt: 3 }}>
-                    <Button
-                      variant="contained"
-                      size="large"
-                      sx={{ mr: 2, mb: 2 }}
-                      onClick={() => router.push('/register')}
-                    >
-                      Bắt đầu ngay
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      size="large"
-                      sx={{ color: 'white', borderColor: 'white', mb: 2 }}
-                      onClick={() => router.push('/login')}
-                    >
-                      Đăng nhập
-                    </Button>
-                  </Box>
-                )}
+                <Box sx={{ mt: 3 }}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    sx={{ mr: 2, mb: 2 }}
+                    onClick={() => router.push('/register')}
+                  >
+                    Bắt đầu ngay
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    sx={{ color: 'white', borderColor: 'white', mb: 2 }}
+                    onClick={() => router.push('/login')}
+                  >
+                    Đăng nhập
+                  </Button>
+                </Box>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Box

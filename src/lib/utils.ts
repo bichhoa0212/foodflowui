@@ -1,3 +1,5 @@
+"use client";
+
 import crypto from 'crypto';
 
 // Lấy secret key từ environment
