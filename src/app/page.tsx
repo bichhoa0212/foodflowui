@@ -23,7 +23,8 @@ import ProductFilterBar from '@/components/ProductFilterBar';
 import ProductList from '@/components/ProductList';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { publicAPI } from '@/lib/publicApi';
+import { productAPI } from '@/lib/productApi';
+import { restaurantAPI } from '@/lib/restaurantApi';
 
 // Tạo theme Material-UI
 const theme = createTheme({
@@ -53,15 +54,23 @@ const HomePage = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
+  const [topProducts, setTopProducts] = useState<any[]>([]);
+  const [topRestaurants, setTopRestaurants] = useState<any[]>([]);
+  const [topReviewedProducts, setTopReviewedProducts] = useState<any[]>([]);
+  const [topReviewedRestaurants, setTopReviewedRestaurants] = useState<any[]>([]);
 
   useEffect(() => {
-    publicAPI.getCategories({ page: 0, size: 50 })
+    restaurantAPI.getCategories({ page: 0, size: 50 })
       .then(res => setCategories(res.data.data.data || res.data.data.content || []));
+    productAPI.getTopPurchasedProducts().then(res => setTopProducts(res.data.data || []));
+    restaurantAPI.getTopPurchasedRestaurants().then(res => setTopRestaurants(res.data.data || []));
+    productAPI.getTopReviewedProducts().then(res => setTopReviewedProducts(res.data.data || []));
+    restaurantAPI.getTopReviewedRestaurants().then(res => setTopReviewedRestaurants(res.data.data || []));
   }, []);
 
   const fetchProducts = () => {
     setLoading(true);
-    publicAPI.getProducts({
+    productAPI.getProducts({
       page,
       size,
       categoryId: selectedCategory,
@@ -191,6 +200,51 @@ const HomePage = () => {
                       Tìm hiểu thêm
                     </Button>
                   </CardActions>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+
+        {/* Top 10 sản phẩm hot nhất */}
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Typography variant="h4" component="h2" gutterBottom>Top 10 món ăn hot nhất</Typography>
+          <ProductList products={topProducts} loading={false} page={0} size={10} total={topProducts.length} setPage={() => {}} hidePagination />
+        </Container>
+        {/* Top 10 nhà hàng hot nhất */}
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Typography variant="h4" component="h2" gutterBottom>Top 10 nhà hàng hot nhất</Typography>
+          <Grid container spacing={2}>
+            {topRestaurants.map((restaurant: any) => (
+              <Grid item xs={12} md={4} key={restaurant.id}>
+                <Card sx={{ height: 220, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => router.push(`/restaurant/${restaurant.id}`)}>
+                  <CardContent>
+                    <Typography variant="h6">{restaurant.name}</Typography>
+                    <Typography variant="body2" sx={{ minHeight: 40 }}>{restaurant.description}</Typography>
+                    <Typography color="primary" fontWeight="bold">Lượt mua: {restaurant.purchaseCount}</Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+        {/* Top 10 sản phẩm được đánh giá nhiều nhất */}
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Typography variant="h4" component="h2" gutterBottom>Top 10 món ăn được đánh giá nhiều nhất</Typography>
+          <ProductList products={topReviewedProducts} loading={false} page={0} size={10} total={topReviewedProducts.length} setPage={() => {}} hidePagination />
+        </Container>
+        {/* Top 10 nhà hàng được đánh giá nhiều nhất */}
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Typography variant="h4" component="h2" gutterBottom>Top 10 nhà hàng được đánh giá nhiều nhất</Typography>
+          <Grid container spacing={2}>
+            {topReviewedRestaurants.map((restaurant: any) => (
+              <Grid item xs={12} md={4} key={restaurant.id}>
+                <Card sx={{ height: 220, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }} onClick={() => router.push(`/restaurant/${restaurant.id}`)}>
+                  <CardContent>
+                    <Typography variant="h6">{restaurant.name}</Typography>
+                    <Typography variant="body2" sx={{ minHeight: 40 }}>{restaurant.description}</Typography>
+                    <Typography color="primary" fontWeight="bold">Lượt đánh giá: {restaurant.reviewCount}</Typography>
+                  </CardContent>
                 </Card>
               </Grid>
             ))}

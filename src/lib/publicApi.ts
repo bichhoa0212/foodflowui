@@ -32,4 +32,20 @@ export const publicAPI = {
     if (params?.size !== undefined) query.append('size', params.size.toString());
     return publicApi.get(`/public/categories?${query.toString()}`);
   },
+  getTopPurchasedProducts: () => publicApi.get('/products/top-purchased'),
+  getTopReviewedProducts: () => publicApi.get('/products/top-reviewed'),
+  getTopPurchasedRestaurants: () => publicApi.get('/restaurants/top-purchased'),
+  getTopReviewedRestaurants: () => publicApi.get('/restaurants/top-reviewed'),
+  getRestaurantDetail: (id: number) => publicApi.get(`/restaurants/${id}`),
+  getProductsByRestaurant: (id: number) => publicApi.get(`/restaurants/${id}/products`),
+  getReviewsByRestaurant: (id: number, page = 0, size = 5, rating?: number, sort: 'asc' | 'desc' = 'desc') => {
+    let url = `/restaurants/${id}/reviews?page=${page}&size=${size}&sort=${sort}`;
+    if (rating !== undefined) url += `&rating=${rating}`;
+    return publicApi.get(url);
+  },
+  getReviewsByProduct: (id: number, page = 0, size = 5, rating?: number, sort: 'asc' | 'desc' = 'desc') => {
+    let url = `/products/${id}/reviews?page=${page}&size=${size}&sort=${sort}`;
+    if (rating !== undefined) url += `&rating=${rating}`;
+    return publicApi.get(url);
+  },
 };

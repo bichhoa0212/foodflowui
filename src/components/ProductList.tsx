@@ -12,9 +12,10 @@ interface ProductListProps {
   size: number;
   total: number;
   setPage: (v: number) => void;
+  hidePagination?: boolean;
 }
 
-const ProductList: React.FC<ProductListProps> = ({ products, loading, page, size, total, setPage }) => {
+const ProductList: React.FC<ProductListProps> = ({ products, loading, page, size, total, setPage, hidePagination }) => {
   const router = useRouter();
   const { authenticated } = useAuth();
   
@@ -44,18 +45,20 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading, page, size
           </Grid>
         ))}
       </Grid>
-      <Box sx={{ mt: 2, textAlign: 'center' }}>
-        {Array.from({ length: Math.ceil(total / size) }).map((_, i) => (
-          <Button
-            key={i}
-            variant={i === page ? 'contained' : 'outlined'}
-            onClick={() => setPage(i)}
-            sx={{ mx: 0.5 }}
-          >
-            {i + 1}
-          </Button>
-        ))}
-      </Box>
+      {!hidePagination && (
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          {Array.from({ length: Math.ceil(total / size) }).map((_, i) => (
+            <Button
+              key={i}
+              variant={i === page ? 'contained' : 'outlined'}
+              onClick={() => setPage(i)}
+              sx={{ mx: 0.5 }}
+            >
+              {i + 1}
+            </Button>
+          ))}
+        </Box>
+      )}
     </>
   );
 };

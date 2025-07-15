@@ -56,6 +56,14 @@ export const authAPI = {
   corsTest: () => api.get('/auth/cors-test'),
   getDefaultUsers: () => api.get('/auth/default-users'),
   generateChecksum: (data: AuthRequest) => api.post('/auth/generate-checksum', data),
+  postReviewRestaurant: (restaurantId: number, data: { rating: number; comment: string }) => api.post(`/restaurants/${restaurantId}/reviews`, { ...data }),
+  updateReviewRestaurant: (reviewId: number, data: { rating?: number; comment?: string }) => api.put(`/restaurants/reviews/${reviewId}`, data),
+  deleteReviewRestaurant: (reviewId: number) => api.delete(`/restaurants/reviews/${reviewId}`),
+  postReviewProduct: (productId: number, data: { rating: number; comment: string }) => api.post(`/products/${productId}/reviews`, { ...data }),
+  updateReviewProduct: (reviewId: number, data: { rating?: number; comment?: string }) => api.put(`/products/reviews/${reviewId}`, data),
+  deleteReviewProduct: (reviewId: number) => api.delete(`/products/reviews/${reviewId}`),
+  orderProduct: (productId: number, data: { quantity: number; deliveryAddress: string; contactPhone: string; notes?: string }) => api.post(`/products/${productId}/order`, data),
+  orderProducts: (data: { items: { productId: number; quantity: number }[]; deliveryAddress: string; contactPhone: string; notes?: string }) => api.post('/products/order', data),
 };
 
 export interface RegisterRequest {
