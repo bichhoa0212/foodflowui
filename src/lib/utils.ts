@@ -3,7 +3,9 @@
 import crypto from 'crypto';
 
 /**
- * Lấy secret key từ biến môi trường (ưu tiên APP_SECRET_KEY, sau đó SECRET_KEY, fallback mặc định)
+ * Lấy secret key từ biến môi trường
+ * - Ưu tiên APP_SECRET_KEY, sau đó SECRET_KEY, cuối cùng là fallback mặc định
+ * @returns string - secret key
  */
 const getSecretKey = (): string => {
   return process.env.APP_SECRET_KEY || process.env.SECRET_KEY || '793ddabd7c83070cd1ac72877edd9d29';
@@ -11,8 +13,8 @@ const getSecretKey = (): string => {
 
 /**
  * Tạo checksum SHA256 với secret key (dùng cho xác thực)
- * @param providerUserId - Tên đăng nhập (email/số điện thoại)
- * @param password - Mật khẩu
+ * @param providerUserId - tên đăng nhập (email/số điện thoại)
+ * @param password - mật khẩu
  * @returns Chuỗi hash SHA256
  */
 export const generateChecksum = (providerUserId: string, password: string): string => {
@@ -25,6 +27,9 @@ export const generateChecksum = (providerUserId: string, password: string): stri
 
 /**
  * Tạo checksum đơn giản (không có secret key, dùng cho test)
+ * @param providerUserId - tên đăng nhập
+ * @param password - mật khẩu
+ * @returns Chuỗi hash SHA256
  */
 export const generateSimpleChecksum = (providerUserId: string, password: string): string => {
   const data = `${providerUserId}${password}`;
@@ -33,6 +38,8 @@ export const generateSimpleChecksum = (providerUserId: string, password: string)
 
 /**
  * Kiểm tra định dạng email hợp lệ
+ * @param email - email cần kiểm tra
+ * @returns true nếu hợp lệ, false nếu sai định dạng
  */
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -41,6 +48,8 @@ export const validateEmail = (email: string): boolean => {
 
 /**
  * Kiểm tra định dạng số điện thoại Việt Nam hợp lệ
+ * @param phone - số điện thoại cần kiểm tra
+ * @returns true nếu hợp lệ, false nếu sai định dạng
  */
 export const validatePhone = (phone: string): boolean => {
   const phoneRegex = /^(0|\+84)(3[2-9]|5[689]|7[06-9]|8[1-689]|9[0-46-9])[0-9]{7}$/;
@@ -49,6 +58,8 @@ export const validatePhone = (phone: string): boolean => {
 
 /**
  * Kiểm tra mật khẩu đủ mạnh (>= 6 ký tự)
+ * @param password - mật khẩu
+ * @returns true nếu hợp lệ, false nếu yếu
  */
 export const validatePassword = (password: string): boolean => {
   return password.length >= 6;
@@ -56,6 +67,8 @@ export const validatePassword = (password: string): boolean => {
 
 /**
  * Chuẩn hóa số điện thoại về dạng 0xxxxxxxxx
+ * @param phone - số điện thoại
+ * @returns số điện thoại chuẩn hóa
  */
 export const formatPhoneNumber = (phone: string): string => {
   // Loại bỏ ký tự không phải số
@@ -69,6 +82,8 @@ export const formatPhoneNumber = (phone: string): string => {
 
 /**
  * Lưu accessToken và refreshToken vào localStorage
+ * @param accessToken
+ * @param refreshToken
  */
 export const saveTokens = (accessToken: string, refreshToken: string): void => {
   localStorage.setItem('accessToken', accessToken);
@@ -85,6 +100,7 @@ export const clearTokens = (): void => {
 
 /**
  * Kiểm tra user đã đăng nhập chưa (có accessToken)
+ * @returns true nếu đã đăng nhập, false nếu chưa
  */
 export const isAuthenticated = (): boolean => {
   return !!localStorage.getItem('accessToken');

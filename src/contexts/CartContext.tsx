@@ -2,7 +2,14 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// Kiểu dữ liệu cho item trong giỏ hàng
+/**
+ * Kiểu dữ liệu cho item trong giỏ hàng
+ * - productId: mã sản phẩm
+ * - name: tên sản phẩm
+ * - imageUrl: ảnh sản phẩm
+ * - price: giá
+ * - quantity: số lượng
+ */
 export interface CartItem {
   productId: number;
   name: string;
@@ -11,7 +18,14 @@ export interface CartItem {
   quantity: number;
 }
 
-// Kiểu dữ liệu context
+/**
+ * Kiểu dữ liệu context giỏ hàng
+ * - cart: danh sách sản phẩm trong giỏ
+ * - addToCart: thêm sản phẩm vào giỏ
+ * - removeFromCart: xóa sản phẩm khỏi giỏ
+ * - updateQuantity: cập nhật số lượng sản phẩm
+ * - clearCart: xóa toàn bộ giỏ hàng
+ */
 interface CartContextType {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
@@ -24,6 +38,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 /**
  * Custom hook sử dụng CartContext
+ * Đảm bảo chỉ dùng trong CartProvider, nếu không sẽ throw lỗi.
  */
 export const useCart = () => {
   const context = useContext(CartContext);
@@ -33,23 +48,27 @@ export const useCart = () => {
 
 /**
  * Provider quản lý trạng thái giỏ hàng toàn cục
+ * - Lưu trạng thái giỏ hàng vào localStorage
+ * - Cung cấp các hàm thao tác với giỏ hàng
  */
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cart, setCart] = useState<CartItem[]>([]); // Danh sách sản phẩm trong giỏ
 
-  // Load cart từ localStorage khi mount
+  // Load cart từ localStorage khi mount (chỉ chạy 1 lần)
   useEffect(() => {
     const stored = localStorage.getItem('cart');
     if (stored) setCart(JSON.parse(stored));
   }, []);
 
-  // Lưu cart vào localStorage mỗi khi thay đổi
+  // Lưu cart vào localStorage mỗi khi thay đổi (đồng bộ đa tab)
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cart));
   }, [cart]);
 
   /**
-   * Thêm sản phẩm vào giỏ (nếu đã có thì cộng dồn số lượng)
+   * Thêm sản phẩm vào giỏ:
+   * - Nếu đã có thì cộng dồn số lượng
+   * - Nếu chưa có thì thêm mới
    */
   const addToCart = (item: CartItem) => {
     setCart(prev => {
@@ -62,7 +81,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   /**
-   * Xóa sản phẩm khỏi giỏ
+   * Xóa sản phẩm khỏi giỏ theo productId
    */
   const removeFromCart = (productId: number) => {
     setCart(prev => prev.filter(i => i.productId !== productId));
@@ -70,6 +89,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   /**
    * Cập nhật số lượng sản phẩm trong giỏ
+   * - Nếu productId không tồn tại thì không thay đổi gì
    */
   const updateQuantity = (productId: number, quantity: number) => {
     setCart(prev => prev.map(i => i.productId === productId ? { ...i, quantity } : i));

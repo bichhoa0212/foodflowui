@@ -6,14 +6,20 @@ const api = getApiInstance();
 
 /**
  * Các hàm liên quan đến sản phẩm (product)
+ * - Sử dụng axios instance chung (api)
+ * - Trả về promise, cần xử lý lỗi ở nơi gọi
  */
 export const productAPI = {
   /**
    * Lấy chi tiết sản phẩm theo id
+   * @param id - id sản phẩm
+   * @returns Promise<AxiosResponse>
    */
   getProductDetail: (id: number) => api.get(`/products/${id}`),
   /**
    * Lấy danh sách sản phẩm với filter
+   * @param params - các tham số lọc, phân trang, sắp xếp
+   * @returns Promise<AxiosResponse>
    */
   getProducts: (params: {
     page?: number;
@@ -36,14 +42,22 @@ export const productAPI = {
   },
   /**
    * Lấy top sản phẩm bán chạy
+   * @returns Promise<AxiosResponse>
    */
   getTopPurchasedProducts: () => api.get('/products/top-purchased'),
   /**
    * Lấy top sản phẩm được review nhiều
+   * @returns Promise<AxiosResponse>
    */
   getTopReviewedProducts: () => api.get('/products/top-reviewed'),
   /**
    * Lấy review của sản phẩm
+   * @param id - id sản phẩm
+   * @param page - trang
+   * @param size - số lượng mỗi trang
+   * @param rating - lọc theo rating
+   * @param sort - sắp xếp asc/desc
+   * @returns Promise<AxiosResponse>
    */
   getReviewsByProduct: (id: number, page = 0, size = 5, rating?: number, sort: 'asc' | 'desc' = 'desc') => {
     let url = `/products/${id}/reviews?page=${page}&size=${size}&sort=${sort}`;
