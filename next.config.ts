@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
       // API rewrite (giữ lại)
       {
         source: "/api/:path*",
-        destination: "http://localhost:8080/api/:path*",
+        destination: "http://192.168.21.26:8080/api/:path*",
       },
     ];
   },

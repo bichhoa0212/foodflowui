@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Box, Container, Typography, CircularProgress, Card, CardContent, Chip, Stack, Button, TextField } from "@mui/material";
+import ReviewItem from '@/components/review/ReviewItem';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -31,6 +32,7 @@ export default function ProductDetailPage() {
   const [orderForm, setOrderForm] = useState({ quantity: 1, deliveryAddress: '', contactPhone: '', notes: '' });
   const [ordering, setOrdering] = useState(false);
 
+  // Lấy review
   const fetchReviews = async (page = 0, rating = reviewFilterRating, sort = reviewSort) => {
     const res = await productAPI.getReviewsByProduct(Number(id), page, reviewSize, rating, sort);
     setReviews(res.data.data.reviews || []);
@@ -58,6 +60,7 @@ export default function ProductDetailPage() {
     fetchReviews(reviewPage, reviewFilterRating, reviewSort);
   }, [id, reviewPage, reviewSize, reviewFilterRating, reviewSort]);
 
+  // Xử lý submit review
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
@@ -73,12 +76,11 @@ export default function ProductDetailPage() {
       setSubmitting(false);
     }
   };
-
+  // Xử lý edit review
   const handleEditClick = (review: any) => {
     setEditingReviewId(review.id);
     setEditForm({ rating: review.rating, comment: review.comment });
   };
-
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingReviewId) return;
@@ -93,7 +95,7 @@ export default function ProductDetailPage() {
       setEditSubmitting(false);
     }
   };
-
+  // Xử lý xóa review
   const handleDelete = async (reviewId: number) => {
     if (!window.confirm('Bạn chắc chắn muốn xóa đánh giá này?')) return;
     try {
@@ -104,6 +106,7 @@ export default function ProductDetailPage() {
     }
   };
 
+  // Xử lý đặt hàng
   const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!id) return;
@@ -124,6 +127,7 @@ export default function ProductDetailPage() {
       <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: '#f7f7f7' }}>
         <Header />
         <Container maxWidth="md" sx={{ py: 6 }}>
+          {/* Loading/Error */}
           {loading ? (
             <Box sx={{ textAlign: "center", py: 8 }}><CircularProgress /></Box>
           ) : error ? (
@@ -145,6 +149,7 @@ export default function ProductDetailPage() {
             </Card>
           ) : null}
 
+          {/* Review section */}
           <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>Đánh giá sản phẩm ({reviewTotal})</Typography>
           <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
             <Typography>Lọc theo số sao:</Typography>
@@ -158,6 +163,7 @@ export default function ProductDetailPage() {
               <option value="asc">Cũ nhất</option>
             </select>
           </Stack>
+          {/* Form gửi review */}
           {authenticated && (
             <Box component="form" onSubmit={handleReviewSubmit} sx={{ mb: 3, p: 2, border: '1px solid #eee', borderRadius: 2, background: '#fafafa' }}>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>Gửi đánh giá của bạn:</Typography>
@@ -171,8 +177,7 @@ export default function ProductDetailPage() {
                 value={reviewForm.comment}
                 onChange={e => setReviewForm(f => ({ ...f, comment: e.target.value }))}
                 rows={3}
-                style={{ width: '100%', fontSize: 16, padding: 8, marginBottom: 8 }}
-                placeholder="Nhập bình luận của bạn..."
+                className="review-textarea"
                 required
               />
               <Button type="submit" variant="contained" disabled={submitting}>
@@ -180,52 +185,25 @@ export default function ProductDetailPage() {
               </Button>
             </Box>
           )}
+          {/* Danh sách review */}
           {reviews.length === 0 ? (
             <Typography>Chưa có đánh giá nào.</Typography>
           ) : (
             <Box>
               {reviews.map((review: any) => (
-                <Card key={review.id} sx={{ mb: 2 }}>
-                  <CardContent>
-                    {editingReviewId === review.id ? (
-                      <Box component="form" onSubmit={handleEditSubmit} sx={{ mb: 2 }}>
-                        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                          <Typography fontWeight={700}>{review.userName}</Typography>
-                          <select value={editForm.rating} onChange={e => setEditForm(f => ({ ...f, rating: Number(e.target.value) }))} style={{ fontSize: 16, padding: 4 }}>
-                            {[1,2,3,4,5].map(star => <option key={star} value={star}>{star}</option>)}
-                          </select>
-                          <Typography variant="body2" color="text.secondary">{new Date(review.createdDate).toLocaleString()}</Typography>
-                        </Stack>
-                        <textarea
-                          value={editForm.comment}
-                          onChange={e => setEditForm(f => ({ ...f, comment: e.target.value }))}
-                          rows={3}
-                          style={{ width: '100%', fontSize: 16, padding: 8, marginBottom: 8 }}
-                          required
-                        />
-                        <Button type="submit" variant="contained" disabled={editSubmitting} sx={{ mr: 1 }}>
-                          {editSubmitting ? 'Đang lưu...' : 'Lưu'}
-                        </Button>
-                        <Button variant="outlined" onClick={() => setEditingReviewId(null)}>Hủy</Button>
-                      </Box>
-                    ) : (
-                      <>
-                        <Stack direction="row" spacing={2} alignItems="center">
-                          <Typography fontWeight={700}>{review.userName}</Typography>
-                          <Chip label={`⭐ ${review.rating}`} color="warning" size="small" />
-                          <Typography variant="body2" color="text.secondary">{new Date(review.createdDate).toLocaleString()}</Typography>
-                        </Stack>
-                        <Typography sx={{ mt: 1 }}>{review.comment}</Typography>
-                        {authenticated && userInfo?.name === review.userName && (
-                          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                            <Button size="small" variant="outlined" onClick={() => handleEditClick(review)}>Sửa</Button>
-                            <Button size="small" variant="outlined" color="error" onClick={() => handleDelete(review.id)}>Xóa</Button>
-                          </Stack>
-                        )}
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
+                <ReviewItem
+                  key={review.id}
+                  review={review}
+                  isEditing={editingReviewId === review.id}
+                  editForm={editForm}
+                  setEditForm={setEditForm}
+                  onEditClick={() => handleEditClick(review)}
+                  onEditSubmit={handleEditSubmit}
+                  onCancelEdit={() => setEditingReviewId(null)}
+                  editSubmitting={editSubmitting}
+                  onDelete={() => handleDelete(review.id)}
+                  canEdit={authenticated && userInfo?.name === review.userName}
+                />
               ))}
               <Stack direction="row" spacing={1} sx={{ mt: 2, justifyContent: 'center' }}>
                 {Array.from({ length: Math.ceil(reviewTotal / reviewSize) }).map((_, i) => (
@@ -241,6 +219,7 @@ export default function ProductDetailPage() {
             </Box>
           )}
 
+          {/* Đặt hàng section */}
           <Typography variant="h5" sx={{ mt: 6, mb: 2 }}>Đặt hàng sản phẩm</Typography>
           {authenticated ? (
             <Box component="form" onSubmit={handleOrderSubmit} sx={{ mb: 3, p: 2, border: '1px solid #eee', borderRadius: 2, background: '#fafafa' }}>

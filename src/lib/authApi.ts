@@ -1,44 +1,18 @@
 "use client";
 
-import axios from 'axios';
-import { createApiInstance } from './baseApi';
+import { getApiInstance } from './baseApi';
 
-const api = createApiInstance();
+const api = getApiInstance();
 
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken) {
-        try {
-          const response = await api.post('/auth/refresh', { refreshToken });
-          const { accessToken } = response.data;
-          localStorage.setItem('accessToken', accessToken);
-          error.config.headers.Authorization = `Bearer ${accessToken}`;
-          return api.request(error.config);
-        } catch {
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          window.location.href = '/login';
-        }
-      }
-    }
-    return Promise.reject(error);
-  }
-);
-
+/**
+ * Các hàm liên quan đến xác thực, đăng ký, refresh token, review, order...
+ * Input/Output đều trả về Promise từ axios.
+ */
 export const authAPI = {
+  /**
+   * Kiểm tra kết nối backend auth (test endpoint)
+   * @returns Promise<boolean>
+   */
   testConnection: async () => {
     try {
       const response = await fetch('http://localhost:8080/api/auth/test');
@@ -47,20 +21,53 @@ export const authAPI = {
       return false;
     }
   },
+  /**
+   * Đăng ký tài khoản mới
+   */
   register: (data: RegisterRequest) => api.post('/auth/register', data),
+  /**
+   * Đăng nhập
+   */
   login: (data: AuthRequest) => api.post('/auth/login', data),
+  /**
+   * Refresh token
+   */
   refreshToken: (data: RefreshTokenRequest) => api.post('/auth/refresh', data),
+  /**
+   * Test endpoint
+   */
   test: () => api.get('/auth/test'),
+  /**
+   * Test CORS
+   */
   corsTest: () => api.get('/auth/cors-test'),
+  /**
+   * Lấy danh sách user mặc định
+   */
   getDefaultUsers: () => api.get('/auth/default-users'),
+  /**
+   * Sinh checksum cho đăng nhập
+   */
   generateChecksum: (data: AuthRequest) => api.post('/auth/generate-checksum', data),
+  /**
+   * Đánh giá nhà hàng
+   */
   postReviewRestaurant: (restaurantId: number, data: { rating: number; comment: string }) => api.post(`/restaurants/${restaurantId}/reviews`, { ...data }),
   updateReviewRestaurant: (reviewId: number, data: { rating?: number; comment?: string }) => api.put(`/restaurants/reviews/${reviewId}`, data),
   deleteReviewRestaurant: (reviewId: number) => api.delete(`/restaurants/reviews/${reviewId}`),
+  /**
+   * Đánh giá sản phẩm
+   */
   postReviewProduct: (productId: number, data: { rating: number; comment: string }) => api.post(`/products/${productId}/reviews`, { ...data }),
   updateReviewProduct: (reviewId: number, data: { rating?: number; comment?: string }) => api.put(`/products/reviews/${reviewId}`, data),
   deleteReviewProduct: (reviewId: number) => api.delete(`/products/reviews/${reviewId}`),
+  /**
+   * Đặt hàng sản phẩm đơn lẻ
+   */
   orderProduct: (productId: number, data: { quantity: number; deliveryAddress: string; contactPhone: string; notes?: string }) => api.post(`/products/${productId}/order`, data),
+  /**
+   * Đặt hàng nhiều sản phẩm
+   */
   orderProducts: (data: { items: { productId: number; quantity: number }[]; deliveryAddress: string; contactPhone: string; notes?: string }) => api.post('/products/order', data),
 };
 

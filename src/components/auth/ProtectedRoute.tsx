@@ -10,10 +10,12 @@ interface ProtectedRouteProps {
   fallback?: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  children, 
-  fallback 
-}) => {
+/**
+ * Component bảo vệ route, chỉ cho phép truy cập khi đã đăng nhập
+ * - Nếu chưa đăng nhập sẽ tự động redirect về trang login
+ * - Hiển thị loading khi đang kiểm tra trạng thái
+ */
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, fallback }) => {
   const { authenticated, loading } = useAuth();
   const router = useRouter();
 
@@ -26,14 +28,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Hiển thị loading khi đang kiểm tra authentication
   if (loading) {
     return fallback || (
-      <Box 
-        sx={{ 
-          display: 'flex', 
+      <Box
+        sx={{
+          display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center', 
-          justifyContent: 'center', 
+          alignItems: 'center',
+          justifyContent: 'center',
           minHeight: '100vh',
-          gap: 2
+          gap: 2,
         }}
       >
         <CircularProgress />

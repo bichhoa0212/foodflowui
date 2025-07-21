@@ -8,12 +8,19 @@ import Footer from '@/components/Footer';
 import { Box, Container, Typography, Card, CardContent, Button, TextField, Stack, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+/**
+ * Trang giỏ hàng
+ * - Hiển thị danh sách sản phẩm trong giỏ
+ * - Cho phép cập nhật số lượng, xóa sản phẩm
+ * - Đặt hàng nhiều sản phẩm cùng lúc
+ */
 export default function CartPage() {
   const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
   const { authenticated } = useAuth();
   const [orderForm, setOrderForm] = useState({ deliveryAddress: '', contactPhone: '', notes: '' });
   const [ordering, setOrdering] = useState(false);
 
+  // Xử lý submit đặt hàng
   const handleOrderSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (cart.length === 0) return alert('Giỏ hàng trống!');
@@ -40,6 +47,7 @@ export default function CartPage() {
       <Header />
       <Container maxWidth="md" sx={{ py: 6 }}>
         <Typography variant="h4" gutterBottom>Giỏ hàng</Typography>
+        {/* Hiển thị danh sách sản phẩm trong giỏ */}
         {cart.length === 0 ? (
           <Typography>Giỏ hàng của bạn đang trống.</Typography>
         ) : (
@@ -67,6 +75,7 @@ export default function CartPage() {
               </Card>
             ))}
             <Typography variant="h6" sx={{ mt: 2 }}>Tổng tiền: {total.toLocaleString()} đ</Typography>
+            {/* Thông tin giao hàng và đặt hàng */}
             <Typography variant="h5" sx={{ mt: 4, mb: 2 }}>Thông tin giao hàng</Typography>
             {authenticated ? (
               <Box component="form" onSubmit={handleOrderSubmit} sx={{ mb: 3, p: 2, border: '1px solid #eee', borderRadius: 2, background: '#fafafa' }}>

@@ -1,14 +1,20 @@
 "use client";
 
-import axios from 'axios';
-import { createApiInstance } from './baseApi';
+import { getApiInstance } from './baseApi';
 
-const api = createApiInstance();
+const api = getApiInstance();
 
+/**
+ * Các hàm liên quan đến sản phẩm (product)
+ */
 export const productAPI = {
-  getProductDetail: (id: number) => {
-    return api.get(`/products/${id}`);
-  },
+  /**
+   * Lấy chi tiết sản phẩm theo id
+   */
+  getProductDetail: (id: number) => api.get(`/products/${id}`),
+  /**
+   * Lấy danh sách sản phẩm với filter
+   */
   getProducts: (params: {
     page?: number;
     size?: number;
@@ -28,8 +34,17 @@ export const productAPI = {
     if (params.name) query.append('name', params.name);
     return api.get(`/products?${query.toString()}`);
   },
+  /**
+   * Lấy top sản phẩm bán chạy
+   */
   getTopPurchasedProducts: () => api.get('/products/top-purchased'),
+  /**
+   * Lấy top sản phẩm được review nhiều
+   */
   getTopReviewedProducts: () => api.get('/products/top-reviewed'),
+  /**
+   * Lấy review của sản phẩm
+   */
   getReviewsByProduct: (id: number, page = 0, size = 5, rating?: number, sort: 'asc' | 'desc' = 'desc') => {
     let url = `/products/${id}/reviews?page=${page}&size=${size}&sort=${sort}`;
     if (rating !== undefined) url += `&rating=${rating}`;

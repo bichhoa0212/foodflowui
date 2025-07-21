@@ -1,0 +1,26 @@
+.appbar {
+  background: #1976d2;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+}
+.logo {
+  margin-right: 16px;
+  font-size: 28px;
+  color: #fff;
+}
+.flexGrow {
+  flex-grow: 1;
+}
+.userMenu {
+  display: flex;
+  align-items: center;
+}
+.menuButton {
+  color: #fff;
+}
+.authButtons {
+  display: flex;
+  gap: 8px;
+} 

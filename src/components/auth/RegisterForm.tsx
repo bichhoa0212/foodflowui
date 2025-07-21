@@ -1,24 +1,7 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Paper,
-  Container,
-  Alert,
-  IconButton,
-  InputAdornment,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Grid,
-  FormHelperText,
-} from '@mui/material';
-import { Visibility, VisibilityOff, Phone, Email, Person } from '@mui/icons-material';
+import styles from './RegisterForm.module.css';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -26,7 +9,6 @@ import { authAPI, RegisterRequest } from '@/lib/authApi';
 import { generateChecksum, validatePhone, validateEmail } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
-// Schema validation
 const registerSchema = yup.object({
   name: yup.string().required('Vui lòng nhập họ tên'),
   account: yup
@@ -67,8 +49,6 @@ interface RegisterFormProps {
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin }) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [detectedProvider, setDetectedProvider] = useState<'email' | 'phone' | null>(null);
@@ -97,13 +77,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
 
   const accountValue = watch('account');
 
-  // Auto-detect provider when account field changes
   useEffect(() => {
     if (accountValue) {
       const provider = validateEmail(accountValue) ? 'email' : validatePhone(accountValue) ? 'phone' : null;
       setDetectedProvider(provider);
-      
-      // Auto-fill email or phone field based on detected provider
       if (provider === 'email') {
         setValue('email', accountValue);
         setValue('phone', '');
@@ -119,15 +96,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
   const handleRegister = async (data: RegisterFormData) => {
     setError('');
     setSuccess('');
-
     try {
-      // Use the detected provider for the main request
       const provider = detectedProvider || 'email';
       const identifier = data.account;
-      
-      // Generate checksum based on detected provider
       const checksum = generateChecksum(identifier, data.password);
-
       const registerData: RegisterRequest = {
         name: data.name,
         email: data.email || '',
@@ -138,350 +110,181 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
         dateOfBirth: data.dateOfBirth,
         provider: provider.toUpperCase(),
         providerUserId: identifier,
-        checksum: checksum,
+        checksum,
         language: 1,
         deviceName: 'Web Browser',
       };
-
       const response = await authAPI.register(registerData);
-      const { accessToken, refreshToken, userInfo } = response.data;
-
-      // Sử dụng AuthContext để lưu token và cập nhật state
       const loginData = {
         provider: provider.toUpperCase(),
         providerUserId: identifier,
         password: data.password,
-        checksum: checksum,
+        checksum,
         language: 1,
       };
-
       const loginSuccess = await login(loginData);
-      
       if (loginSuccess) {
         setSuccess('Đăng ký thành công! Chào mừng bạn đến với FoodFlow');
-        // Redirect sau 2 giây
         setTimeout(() => {
           onSuccess?.();
         }, 2000);
       } else {
         setError('Đăng ký thành công nhưng đăng nhập tự động thất bại. Vui lòng đăng nhập thủ công.');
       }
-
     } catch (error: any) {
       console.error('Register error:', error);
       setError(error.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
     }
   };
 
-  const getAccountIcon = () => {
-    if (detectedProvider === 'email') return <Email />;
-    if (detectedProvider === 'phone') return <Phone />;
-    return <Person />;
-  };
-
-  const getProviderLabel = () => {
-    if (detectedProvider === 'email') return 'Email';
-    if (detectedProvider === 'phone') return 'Số điện thoại';
-    return 'Tài khoản';
-  };
-
   return (
-    <Container component="main" maxWidth="md">
-      <Paper
-        elevation={3}
-        sx={{
-          marginTop: 4,
-          marginBottom: 4,
-          padding: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h4" gutterBottom>
-          Đăng ký tài khoản
-        </Typography>
-        
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Tạo tài khoản mới để sử dụng FoodFlow
-        </Typography>
-
-        {error && (
-          <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        {success && (
-          <Alert severity="success" sx={{ width: '100%', mb: 2 }}>
-            {success}
-          </Alert>
-        )}
-
-        <Box component="form" onSubmit={handleSubmit(handleRegister)} sx={{ width: '100%' }}>
-          <Grid container spacing={2}>
-            {/* Họ tên */}
-            <Grid item xs={12}>
-              <Controller
-                name="name"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Họ tên"
-                    variant="outlined"
-                    error={!!errors.name}
-                    helperText={errors.name?.message}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Person />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                )}
+    <div className={styles.container}>
+      <div className={styles.paper}>
+        <div className={styles.title}>Đăng ký tài khoản</div>
+        {error && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{error}</div>}
+        {success && <div className={styles.alert} style={{ background: '#e8f5e9', color: '#1b5e20' }}>{success}</div>}
+        <form onSubmit={handleSubmit(handleRegister)} style={{ width: '100%' }}>
+          <Controller
+            name="name"
+            control={control}
+            render={({ field }) => (
+              <input
+                {...field}
+                className={styles.input}
+                placeholder="Họ tên"
+                autoComplete="name"
               />
-            </Grid>
-
-            {/* Tài khoản đăng nhập */}
-            <Grid item xs={12}>
-              <Controller
-                name="account"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label={`${getProviderLabel()} đăng nhập`}
-                    variant="outlined"
-                    error={!!errors.account}
-                    helperText={errors.account?.message}
-                    placeholder="VD: 0348236580 hoặc example@email.com"
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          {getAccountIcon()}
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Email (ẩn nếu đã có trong account) */}
-            {detectedProvider !== 'email' && (
-              <Grid item xs={12} md={6}>
-                <Controller
-                  name="email"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label="Email"
-                      type="email"
-                      variant="outlined"
-                      error={!!errors.email}
-                      helperText={errors.email?.message}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Email />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
             )}
-
-            {/* Số điện thoại (ẩn nếu đã có trong account) */}
-            {detectedProvider !== 'phone' && (
-              <Grid item xs={12} md={6}>
-                <Controller
-                  name="phone"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      label="Số điện thoại"
-                      variant="outlined"
-                      error={!!errors.phone}
-                      helperText={errors.phone?.message}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Phone />
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              </Grid>
+          />
+          {errors.name && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{errors.name.message}</div>}
+          <Controller
+            name="account"
+            control={control}
+            render={({ field }) => (
+              <input
+                {...field}
+                className={styles.input}
+                placeholder="Số điện thoại hoặc Email"
+                autoComplete="username"
+              />
             )}
-
-            {/* Mật khẩu */}
-            <Grid item xs={12} md={6}>
-              <Controller
-                name="password"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Mật khẩu"
-                    type={showPassword ? 'text' : 'password'}
-                    variant="outlined"
-                    error={!!errors.password}
-                    helperText={errors.password?.message}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="toggle password visibility"
-                            onClick={() => setShowPassword(!showPassword)}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                )}
+          />
+          {errors.account && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{errors.account.message}</div>}
+          {detectedProvider !== 'email' && (
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  className={styles.input}
+                  placeholder="Email"
+                  type="email"
+                  autoComplete="email"
+                />
+              )}
+            />
+          )}
+          {errors.email && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{errors.email.message}</div>}
+          {detectedProvider !== 'phone' && (
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  className={styles.input}
+                  placeholder="Số điện thoại"
+                  autoComplete="tel"
+                />
+              )}
+            />
+          )}
+          {errors.phone && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{errors.phone.message}</div>}
+          <Controller
+            name="password"
+            control={control}
+            render={({ field }) => (
+              <input
+                {...field}
+                className={styles.input}
+                type="password"
+                placeholder="Mật khẩu"
+                autoComplete="new-password"
               />
-            </Grid>
-
-            {/* Xác nhận mật khẩu */}
-            <Grid item xs={12} md={6}>
-              <Controller
-                name="confirmPassword"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Xác nhận mật khẩu"
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    variant="outlined"
-                    error={!!errors.confirmPassword}
-                    helperText={errors.confirmPassword?.message}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="toggle confirm password visibility"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                            edge="end"
-                          >
-                            {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                )}
+            )}
+          />
+          {errors.password && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{errors.password.message}</div>}
+          <Controller
+            name="confirmPassword"
+            control={control}
+            render={({ field }) => (
+              <input
+                {...field}
+                className={styles.input}
+                type="password"
+                placeholder="Xác nhận mật khẩu"
+                autoComplete="new-password"
               />
-            </Grid>
-
-            {/* Giới tính */}
-            <Grid item xs={12} md={6}>
-              <Controller
-                name="sex"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.sex}>
-                    <InputLabel>Giới tính</InputLabel>
-                    <Select
-                      {...field}
-                      label="Giới tính"
-                      onChange={(e) => field.onChange(e.target.value)}
-                    >
-                      <MenuItem value={1}>Nam</MenuItem>
-                      <MenuItem value={2}>Nữ</MenuItem>
-                      <MenuItem value={3}>Khác</MenuItem>
-                    </Select>
-                    {errors.sex && (
-                      <FormHelperText>{errors.sex.message}</FormHelperText>
-                    )}
-                  </FormControl>
-                )}
+            )}
+          />
+          {errors.confirmPassword && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{errors.confirmPassword.message}</div>}
+          <Controller
+            name="sex"
+            control={control}
+            render={({ field }) => (
+              <select {...field} className={styles.input}>
+                <option value={1}>Nam</option>
+                <option value={2}>Nữ</option>
+                <option value={3}>Khác</option>
+              </select>
+            )}
+          />
+          {errors.sex && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{errors.sex.message}</div>}
+          <Controller
+            name="dateOfBirth"
+            control={control}
+            render={({ field }) => (
+              <input
+                {...field}
+                className={styles.input}
+                type="date"
+                placeholder="Ngày sinh"
+                autoComplete="bday"
               />
-            </Grid>
-
-            {/* Ngày sinh */}
-            <Grid item xs={12} md={6}>
-              <Controller
-                name="dateOfBirth"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Ngày sinh"
-                    type="date"
-                    variant="outlined"
-                    error={!!errors.dateOfBirth}
-                    helperText={errors.dateOfBirth?.message}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  />
-                )}
+            )}
+          />
+          {errors.dateOfBirth && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{errors.dateOfBirth.message}</div>}
+          <Controller
+            name="address"
+            control={control}
+            render={({ field }) => (
+              <input
+                {...field}
+                className={styles.input}
+                placeholder="Địa chỉ"
+                autoComplete="street-address"
               />
-            </Grid>
-
-            {/* Địa chỉ */}
-            <Grid item xs={12}>
-              <Controller
-                name="address"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    label="Địa chỉ"
-                    variant="outlined"
-                    multiline
-                    rows={2}
-                    error={!!errors.address}
-                    helperText={errors.address?.message}
-                  />
-                )}
-              />
-            </Grid>
-          </Grid>
-
-          <Button
+            )}
+          />
+          {errors.address && <div className={styles.alert} style={{ background: '#fdecea', color: '#b71c1c' }}>{errors.address.message}</div>}
+          <button
             type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
+            className={styles.button}
             disabled={loading}
           >
             {loading ? 'Đang đăng ký...' : 'Đăng ký'}
-          </Button>
-
-          <Grid container justifyContent="center">
-            <Grid item>
-              <Button
-                variant="text"
-                onClick={onSwitchToLogin}
-                sx={{ textTransform: 'none' }}
-              >
-                Đã có tài khoản? Đăng nhập ngay
-              </Button>
-            </Grid>
-          </Grid>
-        </Box>
-      </Paper>
-    </Container>
+          </button>
+        </form>
+        <button
+          className={styles.switchLink}
+          type="button"
+          onClick={onSwitchToLogin}
+        >
+          Đã có tài khoản? Đăng nhập ngay
+        </button>
+      </div>
+    </div>
   );
 };
 

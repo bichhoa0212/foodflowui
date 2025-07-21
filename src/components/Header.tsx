@@ -21,38 +21,45 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import styles from './Header.module.css';
 
+/**
+ * Header cố định cho toàn bộ app
+ * - Hiển thị tên app, menu user, nút đăng nhập/đăng ký
+ * - Tự động hiển thị thông tin user nếu đã đăng nhập
+ */
 const Header: React.FC = () => {
   const { authenticated, userInfo, logout } = useAuth();
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
+  // Mở menu user
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
-
+  // Đóng menu user
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
-
+  // Đăng xuất
   const handleLogout = () => {
     handleMenuClose();
     logout();
   };
 
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Restaurant sx={{ mr: 2 }} />
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+    <AppBar position="static" className={styles.appbar}>
+      <Toolbar className={styles.toolbar}>
+        <span className={styles.logo}><Restaurant /></span>
+        <Typography variant="h6" component="div" className={styles.flexGrow}>
           FoodFlow
         </Typography>
         {authenticated ? (
-          <>
+          <div className={styles.userMenu}>
             <IconButton
               size="large"
               onClick={handleMenuOpen}
-              color="inherit"
+              className={styles.menuButton}
             >
               <Avatar sx={{ width: 32, height: 32 }}>
                 <Person />
@@ -72,9 +79,9 @@ const Header: React.FC = () => {
                 Đăng xuất
               </MenuItem>
             </Menu>
-          </>
+          </div>
         ) : (
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <div className={styles.authButtons}>
             <Button
               color="inherit"
               startIcon={<Login />}
@@ -89,7 +96,7 @@ const Header: React.FC = () => {
             >
               Đăng ký
             </Button>
-          </Box>
+          </div>
         )}
       </Toolbar>
     </AppBar>

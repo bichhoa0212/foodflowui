@@ -25,25 +25,24 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { productAPI } from '@/lib/productApi';
 import { restaurantAPI } from '@/lib/restaurantApi';
-import {publicAPI} from "@/lib/publicApi";
+import { publicAPI } from '@/lib/publicApi';
 
 // Tạo theme Material-UI
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
+    primary: { main: '#1976d2' },
+    secondary: { main: '#dc004e' },
   },
-  typography: {
-    fontFamily: 'Roboto, Arial, sans-serif',
-  },
+  typography: { fontFamily: 'Roboto, Arial, sans-serif' },
 });
 
+/**
+ * Trang chủ FoodFlow
+ * - Hero section, features, top sản phẩm/nhà hàng, filter, list
+ */
 const HomePage = () => {
   const router = useRouter();
+  // State filter và dữ liệu
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sort, setSort] = useState('price_asc');
@@ -60,6 +59,7 @@ const HomePage = () => {
   const [topReviewedProducts, setTopReviewedProducts] = useState<any[]>([]);
   const [topReviewedRestaurants, setTopReviewedRestaurants] = useState<any[]>([]);
 
+  // Lấy dữ liệu top và categories khi mount
   useEffect(() => {
     publicAPI.getCategories({ page: 0, size: 50 })
       .then(res => setCategories(res.data.data.data || res.data.data.content || []));
@@ -69,6 +69,7 @@ const HomePage = () => {
     restaurantAPI.getTopReviewedRestaurants().then(res => setTopReviewedRestaurants(res.data.data || []));
   }, []);
 
+  // Lấy danh sách sản phẩm theo filter
   const fetchProducts = () => {
     setLoading(true);
     publicAPI.getProducts({
@@ -87,9 +88,9 @@ const HomePage = () => {
       })
       .finally(() => setLoading(false));
   };
-
   useEffect(() => { fetchProducts(); }, [selectedCategory, sort, minPrice, maxPrice, page, size, search]);
 
+  // Các tính năng nổi bật
   const features = [
     {
       icon: <Restaurant sx={{ fontSize: 40 }} />,
@@ -167,7 +168,6 @@ const HomePage = () => {
             </Grid>
           </Container>
         </Box>
-
         {/* Features Section */}
         <Container maxWidth="lg" sx={{ py: 8 }}>
           <Typography variant="h3" component="h2" textAlign="center" gutterBottom>
@@ -206,13 +206,11 @@ const HomePage = () => {
             ))}
           </Grid>
         </Container>
-
-        {/* Top 10 sản phẩm hot nhất */}
+        {/* Top sản phẩm/nhà hàng nổi bật */}
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Typography variant="h4" component="h2" gutterBottom>Top 10 món ăn hot nhất</Typography>
           <ProductList products={topProducts} loading={false} page={0} size={10} total={topProducts.length} setPage={() => {}} hidePagination />
         </Container>
-        {/* Top 10 nhà hàng hot nhất */}
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Typography variant="h4" component="h2" gutterBottom>Top 10 nhà hàng hot nhất</Typography>
           <Grid container spacing={2}>
@@ -229,12 +227,10 @@ const HomePage = () => {
             ))}
           </Grid>
         </Container>
-        {/* Top 10 sản phẩm được đánh giá nhiều nhất */}
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Typography variant="h4" component="h2" gutterBottom>Top 10 món ăn được đánh giá nhiều nhất</Typography>
           <ProductList products={topReviewedProducts} loading={false} page={0} size={10} total={topReviewedProducts.length} setPage={() => {}} hidePagination />
         </Container>
-        {/* Top 10 nhà hàng được đánh giá nhiều nhất */}
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Typography variant="h4" component="h2" gutterBottom>Top 10 nhà hàng được đánh giá nhiều nhất</Typography>
           <Grid container spacing={2}>
@@ -251,7 +247,6 @@ const HomePage = () => {
             ))}
           </Grid>
         </Container>
-
         {/* Filter + Product List Section */}
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <ProductFilterBar

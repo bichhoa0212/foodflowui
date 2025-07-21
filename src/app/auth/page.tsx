@@ -12,27 +12,20 @@ import { useRouter } from 'next/navigation';
 // Tạo theme Material-UI
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
+    primary: { main: '#1976d2' },
+    secondary: { main: '#dc004e' },
   },
-  typography: {
-    fontFamily: 'Roboto, Arial, sans-serif',
-  },
+  typography: { fontFamily: 'Roboto, Arial, sans-serif' },
 });
 
+// TabPanel cho giao diện tab
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
 }
-
 function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...other } = props;
-
   return (
     <div
       role="tabpanel"
@@ -45,7 +38,6 @@ function TabPanel(props: TabPanelProps) {
     </div>
   );
 }
-
 function a11yProps(index: number) {
   return {
     id: `auth-tab-${index}`,
@@ -53,13 +45,18 @@ function a11yProps(index: number) {
   };
 }
 
+/**
+ * Trang đăng nhập/đăng ký dạng tab
+ * - Tự động redirect nếu đã đăng nhập
+ * - Hiển thị loading khi kiểm tra trạng thái
+ */
 const AuthPage = () => {
   const [tabValue, setTabValue] = useState(0);
   const router = useRouter();
   const { authenticated, loading } = useAuth();
 
+  // Redirect nếu đã đăng nhập
   useEffect(() => {
-    // Kiểm tra nếu user đã đăng nhập thì redirect về trang chủ
     if (!loading && authenticated) {
       router.push('/');
     }
@@ -68,24 +65,12 @@ const AuthPage = () => {
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
+  const handleLoginSuccess = () => { router.push('/'); };
+  const handleRegisterSuccess = () => { router.push('/'); };
+  const handleSwitchToRegister = () => { setTabValue(1); };
+  const handleSwitchToLogin = () => { setTabValue(0); };
 
-  const handleLoginSuccess = () => {
-    router.push('/');
-  };
-
-  const handleRegisterSuccess = () => {
-    router.push('/');
-  };
-
-  const handleSwitchToRegister = () => {
-    setTabValue(1);
-  };
-
-  const handleSwitchToLogin = () => {
-    setTabValue(0);
-  };
-
-  // Hiển thị loading nếu đang kiểm tra authentication
+  // Hiển thị loading khi kiểm tra authentication
   if (loading) {
     return (
       <ThemeProvider theme={theme}>
@@ -123,11 +108,9 @@ const AuthPage = () => {
         <Container maxWidth="md">
           <Paper
             elevation={8}
-            sx={{
-              borderRadius: 2,
-              overflow: 'hidden',
-            }}
+            sx={{ borderRadius: 2, overflow: 'hidden' }}
           >
+            {/* Tabs đăng nhập/đăng ký */}
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <Tabs
                 value={tabValue}
@@ -146,14 +129,12 @@ const AuthPage = () => {
                 <Tab label="Đăng ký" {...a11yProps(1)} />
               </Tabs>
             </Box>
-
             <TabPanel value={tabValue} index={0}>
               <LoginForm
                 onSuccess={handleLoginSuccess}
                 onSwitchToRegister={handleSwitchToRegister}
               />
             </TabPanel>
-
             <TabPanel value={tabValue} index={1}>
               <RegisterForm
                 onSuccess={handleRegisterSuccess}
@@ -161,7 +142,6 @@ const AuthPage = () => {
               />
             </TabPanel>
           </Paper>
-
           {/* Footer */}
           <Box sx={{ textAlign: 'center', mt: 3 }}>
             <Typography variant="body2" color="white" sx={{ opacity: 0.8 }}>

@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { Grid, FormControl, InputLabel, Select, MenuItem, TextField, Button } from '@mui/material';
+import styles from './ProductFilterBar.module.css';
 
 interface ProductFilterBarProps {
   categories: any[];
@@ -18,6 +18,11 @@ interface ProductFilterBarProps {
   onSearch: () => void;
 }
 
+/**
+ * Thanh lọc sản phẩm (filter bar)
+ * - Lọc theo tên, loại, giá, sắp xếp
+ * - Gọi onSearch khi nhấn Enter ở ô tìm kiếm
+ */
 const ProductFilterBar: React.FC<ProductFilterBarProps> = ({
   categories,
   selectedCategory,
@@ -33,69 +38,64 @@ const ProductFilterBar: React.FC<ProductFilterBarProps> = ({
   onSearch,
 }) => {
   return (
-    <Grid container spacing={2} alignItems="center">
-      <Grid item xs={12} md={3}>
-        <TextField
-          label="Tên sản phẩm"
+    <div className={styles.filterBar}>
+      {/* Tìm kiếm theo tên sản phẩm */}
+      <div className={styles.gridItem}>
+        <input
+          className={styles.input}
+          type="text"
+          placeholder="Tên sản phẩm..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="Nhập tên sản phẩm..."
-          fullWidth
-          size="small"
           onKeyDown={e => { if (e.key === 'Enter') onSearch(); }}
         />
-      </Grid>
-      <Grid item xs={12} md={3}>
-        <FormControl fullWidth size="small">
-          <InputLabel>Loại sản phẩm</InputLabel>
-          <Select
-            value={selectedCategory}
-            label="Loại sản phẩm"
-            onChange={e => setSelectedCategory(e.target.value)}
-          >
-            <MenuItem value="">Tất cả</MenuItem>
-            {categories.map(cat => (
-              <MenuItem key={cat.id} value={cat.id}>{cat.name}</MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12} md={3}>
-        <FormControl fullWidth size="small">
-          <InputLabel>Sắp xếp</InputLabel>
-          <Select
-            value={sort}
-            label="Sắp xếp"
-            onChange={e => setSort(e.target.value)}
-          >
-            <MenuItem value="price_asc">Giá tăng dần</MenuItem>
-            <MenuItem value="price_desc">Giá giảm dần</MenuItem>
-            <MenuItem value="name_asc">Tên A-Z</MenuItem>
-            <MenuItem value="name_desc">Tên Z-A</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={6} md={1.5}>
-        <TextField
-          label="Giá từ"
+      </div>
+      {/* Lọc theo loại sản phẩm */}
+      <div className={styles.gridItem}>
+        <select
+          className={styles.select}
+          value={selectedCategory}
+          onChange={e => setSelectedCategory(e.target.value)}
+        >
+          <option value="">Tất cả loại</option>
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.id}>{cat.name}</option>
+          ))}
+        </select>
+      </div>
+      {/* Sắp xếp */}
+      <div className={styles.gridItem}>
+        <select
+          className={styles.select}
+          value={sort}
+          onChange={e => setSort(e.target.value)}
+        >
+          <option value="price_asc">Giá tăng dần</option>
+          <option value="price_desc">Giá giảm dần</option>
+          <option value="name_asc">Tên A-Z</option>
+          <option value="name_desc">Tên Z-A</option>
+        </select>
+      </div>
+      {/* Lọc theo giá */}
+      <div className={styles.gridItem}>
+        <input
+          className={styles.input}
           type="number"
+          placeholder="Giá từ"
           value={minPrice}
           onChange={e => setMinPrice(e.target.value)}
-          fullWidth
-          size="small"
         />
-      </Grid>
-      <Grid item xs={6} md={1.5}>
-        <TextField
-          label="Đến"
+      </div>
+      <div className={styles.gridItem}>
+        <input
+          className={styles.input}
           type="number"
+          placeholder="Đến"
           value={maxPrice}
           onChange={e => setMaxPrice(e.target.value)}
-          fullWidth
-          size="small"
         />
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   );
 };
 

@@ -17,21 +17,25 @@ import {
   FormControlLabel,
   Checkbox,
 } from '@mui/material';
-import { authAPI, RegisterRequest, AuthRequest, AuthResponse, RefreshTokenRequest } from '@/lib/authApi';
+import { authAPI } from '@/lib/authApi';
 import { generateChecksum, generateSimpleChecksum, validateEmail, validatePhone } from '@/lib/utils';
 import { testBackendConnection, checkCORS, validateLoginData, validateRegisterData } from '@/lib/debug';
 
+/**
+ * Component test/debug API cho dev
+ * - Cho phép test login, register, endpoint, validate, debug backend
+ * - Không dùng cho production
+ */
 const TestAPI = () => {
   const [loginData, setLoginData] = useState({
     account: '0348236580',
     password: '123456',
   });
-  
   const [useSecretKey, setUseSecretKey] = useState(false);
-  
   const [testResults, setTestResults] = useState<any[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
 
+  // Thêm kết quả test vào danh sách
   const addResult = (test: string, result: any, isError = false) => {
     setTestResults(prev => [...prev, {
       id: Date.now(),
@@ -42,16 +46,16 @@ const TestAPI = () => {
     }]);
   };
 
-  // Auto detect provider based on input format
+  // Tự động nhận diện loại tài khoản
   const detectProvider = (input: string): string => {
-    if (validateEmail(input)) {
-      return 'EMAIL';
-    } else if (validatePhone(input)) {
-      return 'PHONE';
-    }
-    return 'PHONE'; // Default to phone
+    if (validateEmail(input)) return 'EMAIL';
+    if (validatePhone(input)) return 'PHONE';
+    return 'PHONE';
   };
 
+  /**
+   * Test login API
+   */
   const handleTestLogin = async () => {
     setLoading('login');
     try {
@@ -59,7 +63,6 @@ const TestAPI = () => {
       const checksum = useSecretKey 
         ? generateChecksum(loginData.account, loginData.password)
         : generateSimpleChecksum(loginData.account, loginData.password);
-      
       const data = {
         provider: detectedProvider,
         providerUserId: loginData.account,
@@ -67,10 +70,7 @@ const TestAPI = () => {
         checksum,
         language: 1,
       };
-      
-      // Validate data before sending
       validateLoginData(data);
-      
       const response = await authAPI.login(data);
       addResult('Login Test', response.data);
     } catch (error: any) {
@@ -80,12 +80,14 @@ const TestAPI = () => {
     }
   };
 
+  /**
+   * Test register API
+   */
   const handleTestRegister = async () => {
     setLoading('register');
     try {
-      const testAccount = 'test@example.com'; // Có thể thay đổi thành số điện thoại
+      const testAccount = 'test@example.com';
       const detectedProvider = detectProvider(testAccount);
-      
       const registerData = {
         name: 'Test User',
         email: detectedProvider === 'EMAIL' ? testAccount : '',
@@ -100,10 +102,7 @@ const TestAPI = () => {
         language: 1,
         deviceName: 'Test Browser',
       };
-      
-      // Validate data before sending
       validateRegisterData(registerData);
-      
       const response = await authAPI.register(registerData);
       addResult('Register Test', response.data);
     } catch (error: any) {
@@ -113,6 +112,9 @@ const TestAPI = () => {
     }
   };
 
+  /**
+   * Test các endpoint khác
+   */
   const handleTestEndpoint = async (endpoint: string) => {
     setLoading(endpoint);
     try {
@@ -138,6 +140,9 @@ const TestAPI = () => {
     }
   };
 
+  /**
+   * Test generate checksum API
+   */
   const handleGenerateChecksum = async () => {
     setLoading('checksum');
     try {
@@ -148,7 +153,6 @@ const TestAPI = () => {
         password: loginData.password,
         language: 1,
       };
-      
       const response = await authAPI.generateChecksum(data);
       addResult('Generate Checksum', response.data);
     } catch (error: any) {
@@ -158,6 +162,9 @@ const TestAPI = () => {
     }
   };
 
+  /**
+   * Test kết nối backend
+   */
   const handleTestConnection = async () => {
     setLoading('connection');
     try {
@@ -173,6 +180,9 @@ const TestAPI = () => {
     }
   };
 
+  /**
+   * Debug backend (in kết quả ra console)
+   */
   const handleDebugBackend = async () => {
     setLoading('debug');
     try {
@@ -185,6 +195,9 @@ const TestAPI = () => {
     }
   };
 
+  /**
+   * Debug CORS (in kết quả ra console)
+   */
   const handleDebugCORS = async () => {
     setLoading('cors');
     try {
@@ -202,7 +215,7 @@ const TestAPI = () => {
       <Typography variant="h4" gutterBottom>
         API Test Console
       </Typography>
-      
+      {/* Test login */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Login Test
@@ -219,21 +232,18 @@ const TestAPI = () => {
               <MenuItem value="EMAIL">EMAIL</MenuItem>
             </Select>
           </FormControl>
-          
           <TextField
             label="Tài khoản đăng nhập"
             value={loginData.account}
             onChange={(e) => setLoginData(prev => ({ ...prev, account: e.target.value }))}
             placeholder="0348236580 hoặc test@example.com"
           />
-          
           <TextField
             label="Password"
             type="password"
             value={loginData.password}
             onChange={(e) => setLoginData(prev => ({ ...prev, password: e.target.value }))}
           />
-          
           <FormControlLabel
             control={
               <Checkbox
@@ -243,7 +253,6 @@ const TestAPI = () => {
             }
             label="Use Secret Key in Checksum"
           />
-          
           <Button
             variant="contained"
             onClick={handleTestLogin}
@@ -253,7 +262,7 @@ const TestAPI = () => {
           </Button>
         </Box>
       </Paper>
-
+      {/* Test khác */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Other Tests
@@ -266,7 +275,6 @@ const TestAPI = () => {
           >
             {loading === 'register' ? 'Testing...' : 'Test Register'}
           </Button>
-          
           <Button
             variant="outlined"
             onClick={() => handleTestEndpoint('test')}
@@ -274,7 +282,6 @@ const TestAPI = () => {
           >
             {loading === 'test' ? 'Testing...' : 'Test Endpoint'}
           </Button>
-          
           <Button
             variant="outlined"
             onClick={() => handleTestEndpoint('cors')}
@@ -282,7 +289,6 @@ const TestAPI = () => {
           >
             {loading === 'cors' ? 'Testing...' : 'CORS Test'}
           </Button>
-          
           <Button
             variant="outlined"
             onClick={() => handleTestEndpoint('default-users')}
@@ -290,7 +296,6 @@ const TestAPI = () => {
           >
             {loading === 'default-users' ? 'Testing...' : 'Default Users'}
           </Button>
-          
           <Button
             variant="outlined"
             onClick={handleGenerateChecksum}
@@ -298,7 +303,6 @@ const TestAPI = () => {
           >
             {loading === 'checksum' ? 'Testing...' : 'Generate Checksum'}
           </Button>
-          
           <Button
             variant="outlined"
             onClick={handleTestConnection}
@@ -307,7 +311,6 @@ const TestAPI = () => {
           >
             {loading === 'connection' ? 'Testing...' : 'Test Connection'}
           </Button>
-          
           <Button
             variant="outlined"
             onClick={handleDebugBackend}
@@ -316,7 +319,6 @@ const TestAPI = () => {
           >
             {loading === 'debug' ? 'Testing...' : 'Debug Backend'}
           </Button>
-          
           <Button
             variant="outlined"
             onClick={handleDebugCORS}
@@ -327,7 +329,7 @@ const TestAPI = () => {
           </Button>
         </Box>
       </Paper>
-
+      {/* Kết quả test */}
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" gutterBottom>
           Test Results
