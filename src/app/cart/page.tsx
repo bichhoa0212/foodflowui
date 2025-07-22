@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { authAPI } from '@/lib/authApi';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Box, Container, Typography, Card, CardContent, Button, TextField, Stack, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
@@ -44,7 +42,6 @@ export default function CartPage() {
 
   return (
     <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: '#f7f7f7' }}>
-      <Header />
       <Container maxWidth="md" sx={{ py: 6 }}>
         <Typography variant="h4" gutterBottom>Giỏ hàng</Typography>
         {/* Hiển thị danh sách sản phẩm trong giỏ */}
@@ -110,7 +107,6 @@ export default function CartPage() {
           </>
         )}
       </Container>
-      <Footer />
     </Box>
   );
 } 

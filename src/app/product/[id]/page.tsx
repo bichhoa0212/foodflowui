@@ -4,8 +4,6 @@ import { useParams } from "next/navigation";
 import { productAPI } from "@/lib/productApi";
 import { authAPI } from '@/lib/authApi';
 import { useAuth } from '@/contexts/AuthContext';
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { Box, Container, Typography, CircularProgress, Card, CardContent, Chip, Stack, Button, TextField } from "@mui/material";
 import ReviewItem from '@/components/review/ReviewItem';
@@ -125,7 +123,6 @@ export default function ProductDetailPage() {
   return (
     <ProtectedRoute>
       <Box sx={{ flexGrow: 1, minHeight: '100vh', bgcolor: '#f7f7f7' }}>
-        <Header />
         <Container maxWidth="md" sx={{ py: 6 }}>
           {/* Loading/Error */}
           {loading ? (
@@ -260,7 +257,6 @@ export default function ProductDetailPage() {
             <Typography color="text.secondary">Vui lòng đăng nhập để đặt hàng.</Typography>
           )}
         </Container>
-        <Footer />
       </Box>
     </ProtectedRoute>
   );

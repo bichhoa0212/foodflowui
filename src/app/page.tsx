@@ -16,25 +16,10 @@ import {
   DeliveryDining,
   ShoppingCart,
 } from '@mui/icons-material';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
 import { useRouter } from 'next/navigation';
 import ProductFilterBar from '@/components/ProductFilterBar';
 import ProductList from '@/components/ProductList';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import { productAPI } from '@/lib/productApi';
-// Đã loại bỏ import restaurantAPI
 import { publicAPI } from '@/lib/publicApi';
-
-// Tạo theme Material-UI
-const theme = createTheme({
-  palette: {
-    primary: { main: '#1976d2' },
-    secondary: { main: '#dc004e' },
-  },
-  typography: { fontFamily: 'Roboto, Arial, sans-serif' },
-});
 
 /**
  * Trang chủ FlowMarket
@@ -62,8 +47,6 @@ const HomePage = () => {
   useEffect(() => {
     publicAPI.getCategories({ page: 0, size: 50 })
       .then(res => setCategories(res.data.data.data || res.data.data.content || []));
-    productAPI.getTopPurchasedProducts().then(res => setTopProducts(res.data.data || []));
-    productAPI.getTopReviewedProducts().then(res => setTopReviewedProducts(res.data.data || []));
     // Đã loại bỏ các API gọi nhà hàng
   }, []);
 
@@ -108,141 +91,136 @@ const HomePage = () => {
   ];
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Box sx={{ flexGrow: 1 }}>
-        <Header />
-        {/* Hero Section */}
-        <Box
-          sx={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            color: 'white',
-            py: 8,
-          }}
-        >
-          <Container maxWidth="lg">
-            <Grid container spacing={4} alignItems="center">
-              <Grid item xs={12} md={6}>
-                <Typography variant="h2" component="h1" gutterBottom>
-                  Chào mừng đến với FlowMarket
-                </Typography>
-                <Typography variant="h5" component="h2" gutterBottom>
-                  Siêu thị cá nhân - Mua sắm sản phẩm dễ dàng
-                </Typography>
-                <Typography variant="body1" paragraph>
-                  Khám phá hàng trăm sản phẩm chất lượng từ siêu thị cá nhân FlowMarket và nhận giao hàng tận nơi nhanh chóng.
-                </Typography>
-                <Box sx={{ mt: 3 }}>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    sx={{ mr: 2, mb: 2 }}
-                    onClick={() => router.push('/register')}
-                  >
-                    Bắt đầu ngay
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="large"
-                    sx={{ color: 'white', borderColor: 'white', mb: 2 }}
-                    onClick={() => router.push('/login')}
-                  >
-                    Đăng nhập
-                  </Button>
-                </Box>
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: 300,
-                  }}
+    <>
+      {/* Hero Section */}
+      <Box
+        sx={{
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          py: 8,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Grid container spacing={4} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Typography variant="h2" component="h1" gutterBottom>
+                Chào mừng đến với FlowMarket
+              </Typography>
+              <Typography variant="h5" component="h2" gutterBottom>
+                Siêu thị cá nhân - Mua sắm sản phẩm dễ dàng
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Khám phá hàng trăm sản phẩm chất lượng từ siêu thị cá nhân FlowMarket và nhận giao hàng tận nơi nhanh chóng.
+              </Typography>
+              <Box sx={{ mt: 3 }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  sx={{ mr: 2, mb: 2 }}
+                  onClick={() => router.push('/register')}
                 >
-                  <Restaurant sx={{ fontSize: 200, opacity: 0.3 }} />
-                </Box>
-              </Grid>
+                  Bắt đầu ngay
+                </Button>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  sx={{ color: 'white', borderColor: 'white', mb: 2 }}
+                  onClick={() => router.push('/login')}
+                >
+                  Đăng nhập
+                </Button>
+              </Box>
             </Grid>
-          </Container>
-        </Box>
-        {/* Features Section */}
-        <Container maxWidth="lg" sx={{ py: 8 }}>
-          <Typography variant="h3" component="h2" textAlign="center" gutterBottom>
-            Tại sao chọn FlowMarket?
-          </Typography>
-          <Grid container spacing={4} sx={{ mt: 4 }}>
-            {features.map((feature, index) => (
-              <Grid item xs={12} md={4} key={index}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    textAlign: 'center',
-                    p: 2,
-                  }}
-                >
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Box sx={{ color: 'primary.main', mb: 2 }}>
-                      {feature.icon}
-                    </Box>
-                    <Typography gutterBottom variant="h5" component="h3">
-                      {feature.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {feature.description}
-                    </Typography>
-                  </CardContent>
-                  <CardActions sx={{ justifyContent: 'center' }}>
-                    <Button size="small" color="primary">
-                      Tìm hiểu thêm
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            ))}
+            <Grid item xs={12} md={6}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  height: 300,
+                }}
+              >
+                <Restaurant sx={{ fontSize: 200, opacity: 0.3 }} />
+              </Box>
+            </Grid>
           </Grid>
         </Container>
-        {/* Top sản phẩm nổi bật */}
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-          <Typography variant="h4" component="h2" gutterBottom>Top 10 sản phẩm bán chạy nhất</Typography>
-          <ProductList products={topProducts} loading={false} page={0} size={10} total={topProducts.length} setPage={() => {}} hidePagination />
-        </Container>
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-          <Typography variant="h4" component="h2" gutterBottom>Top 10 sản phẩm được đánh giá nhiều nhất</Typography>
-          <ProductList products={topReviewedProducts} loading={false} page={0} size={10} total={topReviewedProducts.length} setPage={() => {}} hidePagination />
-        </Container>
-        {/* Filter + Product List Section */}
-        <Container maxWidth="lg" sx={{ py: 4 }}>
-          <ProductFilterBar
-            categories={categories}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            sort={sort}
-            setSort={setSort}
-            minPrice={minPrice}
-            setMinPrice={setMinPrice}
-            maxPrice={maxPrice}
-            setMaxPrice={setMaxPrice}
-            search={search}
-            setSearch={setSearch}
-            onSearch={() => { setPage(0); fetchProducts(); }}
-          />
-          <Box sx={{ mt: 4 }}>
-            <ProductList
-              products={products}
-              loading={loading}
-              page={page}
-              size={size}
-              total={total}
-              setPage={setPage}
-            />
-          </Box>
-        </Container>
-        <Footer />
       </Box>
-    </ThemeProvider>
+      {/* Features Section */}
+      <Container maxWidth="lg" sx={{ py: 8 }}>
+        <Typography variant="h3" component="h2" textAlign="center" gutterBottom>
+          Tại sao chọn FlowMarket?
+        </Typography>
+        <Grid container spacing={4} sx={{ mt: 4 }}>
+          {features.map((feature, index) => (
+            <Grid item xs={12} md={4} key={index}>
+              <Card
+                sx={{
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  textAlign: 'center',
+                  p: 2,
+                }}
+              >
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Box sx={{ color: 'primary.main', mb: 2 }}>
+                    {feature.icon}
+                  </Box>
+                  <Typography gutterBottom variant="h5" component="h3">
+                    {feature.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {feature.description}
+                  </Typography>
+                </CardContent>
+                <CardActions sx={{ justifyContent: 'center' }}>
+                  <Button size="small" color="primary">
+                    Tìm hiểu thêm
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+      {/* Top sản phẩm nổi bật */}
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h4" component="h2" gutterBottom>Top 10 sản phẩm bán chạy nhất</Typography>
+        <ProductList products={topProducts} loading={false} page={0} size={10} total={topProducts.length} setPage={() => {}} hidePagination />
+      </Container>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h4" component="h2" gutterBottom>Top 10 sản phẩm được đánh giá nhiều nhất</Typography>
+        <ProductList products={topReviewedProducts} loading={false} page={0} size={10} total={topReviewedProducts.length} setPage={() => {}} hidePagination />
+      </Container>
+      {/* Filter + Product List Section */}
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <ProductFilterBar
+          categories={categories}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          sort={sort}
+          setSort={setSort}
+          minPrice={minPrice}
+          setMinPrice={setMinPrice}
+          maxPrice={maxPrice}
+          setMaxPrice={setMaxPrice}
+          search={search}
+          setSearch={setSearch}
+          onSearch={() => { setPage(0); fetchProducts(); }}
+        />
+        <Box sx={{ mt: 4 }}>
+          <ProductList
+            products={products}
+            loading={loading}
+            page={page}
+            size={size}
+            total={total}
+            setPage={setPage}
+          />
+        </Box>
+      </Container>
+    </>
   );
 };
 
