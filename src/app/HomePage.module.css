@@ -1,0 +1,84 @@
+.hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 64px 0;
+}
+.heroTitle {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.heroSubtitle {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.heroDesc {
+  font-size: 1.1rem;
+  margin-bottom: 24px;
+}
+.heroButton {
+  margin-right: 16px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 8px 32px;
+}
+.heroButtonOutlined {
+  color: #fff !important;
+  border-color: #fff !important;
+  background: none !important;
+}
+.heroImage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+.featuresSection {
+  padding: 64px 0 32px 0;
+}
+.featuresTitle {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+.featureCard {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(23, 100, 67, 0.06);
+  background: #fff;
+}
+.featureIcon {
+  color: var(--mui-primary-main, #176443);
+  margin-bottom: 16px;
+  font-size: 40px !important;
+}
+.featureTitle {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.featureDesc {
+  color: #666;
+  font-size: 1rem;
+}
+.cardActions {
+  justify-content: center;
+}
+.topSection {
+  padding: 32px 0;
+}
+.topTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.filterSection {
+  padding: 32px 0;
+}

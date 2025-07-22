@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import ProductFilterBar from '@/components/ProductFilterBar';
 import ProductList from '@/components/ProductList';
 import { publicAPI } from '@/lib/publicApi';
+import styles from './HomePage.module.css';
 
 /**
  * Trang chủ FlowMarket
@@ -93,30 +94,24 @@ const HomePage = () => {
   return (
     <>
       {/* Hero Section */}
-      <Box
-        sx={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          color: 'white',
-          py: 8,
-        }}
-      >
+      <Box className={styles.hero}>
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={6}>
-              <Typography variant="h2" component="h1" gutterBottom>
+              <Typography variant="h2" component="h1" gutterBottom className={styles.heroTitle}>
                 Chào mừng đến với FlowMarket
               </Typography>
-              <Typography variant="h5" component="h2" gutterBottom>
+              <Typography variant="h5" component="h2" gutterBottom className={styles.heroSubtitle}>
                 Siêu thị cá nhân - Mua sắm sản phẩm dễ dàng
               </Typography>
-              <Typography variant="body1" paragraph>
+              <Typography variant="body1" paragraph className={styles.heroDesc}>
                 Khám phá hàng trăm sản phẩm chất lượng từ siêu thị cá nhân FlowMarket và nhận giao hàng tận nơi nhanh chóng.
               </Typography>
-              <Box sx={{ mt: 3 }}>
+              <Box>
                 <Button
                   variant="contained"
                   size="large"
-                  sx={{ mr: 2, mb: 2 }}
+                  className={styles.heroButton}
                   onClick={() => router.push('/register')}
                 >
                   Bắt đầu ngay
@@ -124,7 +119,7 @@ const HomePage = () => {
                 <Button
                   variant="outlined"
                   size="large"
-                  sx={{ color: 'white', borderColor: 'white', mb: 2 }}
+                  className={`${styles.heroButton} ${styles.heroButtonOutlined}`}
                   onClick={() => router.push('/login')}
                 >
                   Đăng nhập
@@ -132,14 +127,7 @@ const HomePage = () => {
               </Box>
             </Grid>
             <Grid item xs={12} md={6}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: 300,
-                }}
-              >
+              <Box className={styles.heroImage}>
                 <Restaurant sx={{ fontSize: 200, opacity: 0.3 }} />
               </Box>
             </Grid>
@@ -147,34 +135,26 @@ const HomePage = () => {
         </Container>
       </Box>
       {/* Features Section */}
-      <Container maxWidth="lg" sx={{ py: 8 }}>
-        <Typography variant="h3" component="h2" textAlign="center" gutterBottom>
+      <Container maxWidth="lg" className={styles.featuresSection}>
+        <Typography variant="h3" component="h2" gutterBottom className={styles.featuresTitle}>
           Tại sao chọn FlowMarket?
         </Typography>
         <Grid container spacing={4} sx={{ mt: 4 }}>
           {features.map((feature, index) => (
             <Grid item xs={12} md={4} key={index}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  textAlign: 'center',
-                  p: 2,
-                }}
-              >
+              <Card className={styles.featureCard}>
                 <CardContent sx={{ flexGrow: 1 }}>
-                  <Box sx={{ color: 'primary.main', mb: 2 }}>
+                  <Box className={styles.featureIcon}>
                     {feature.icon}
                   </Box>
-                  <Typography gutterBottom variant="h5" component="h3">
+                  <Typography gutterBottom variant="h5" component="h3" className={styles.featureTitle}>
                     {feature.title}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" color="text.secondary" className={styles.featureDesc}>
                     {feature.description}
                   </Typography>
                 </CardContent>
-                <CardActions sx={{ justifyContent: 'center' }}>
+                <CardActions className={styles.cardActions}>
                   <Button size="small" color="primary">
                     Tìm hiểu thêm
                   </Button>
@@ -185,16 +165,16 @@ const HomePage = () => {
         </Grid>
       </Container>
       {/* Top sản phẩm nổi bật */}
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h4" component="h2" gutterBottom>Top 10 sản phẩm bán chạy nhất</Typography>
+      <Container maxWidth="lg" className={styles.topSection}>
+        <Typography variant="h4" component="h2" gutterBottom className={styles.topTitle}>Top 10 sản phẩm bán chạy nhất</Typography>
         <ProductList products={topProducts} loading={false} page={0} size={10} total={topProducts.length} setPage={() => {}} hidePagination />
       </Container>
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h4" component="h2" gutterBottom>Top 10 sản phẩm được đánh giá nhiều nhất</Typography>
+      <Container maxWidth="lg" className={styles.topSection}>
+        <Typography variant="h4" component="h2" gutterBottom className={styles.topTitle}>Top 10 sản phẩm được đánh giá nhiều nhất</Typography>
         <ProductList products={topReviewedProducts} loading={false} page={0} size={10} total={topReviewedProducts.length} setPage={() => {}} hidePagination />
       </Container>
       {/* Filter + Product List Section */}
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="lg" className={styles.filterSection}>
         <ProductFilterBar
           categories={categories}
           selectedCategory={selectedCategory}
