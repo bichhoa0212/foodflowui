@@ -1,0 +1,264 @@
+.sliderWrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 32px auto 0 auto;
+  position: relative;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 16px rgba(23, 100, 67, 0.08);
+  overflow: hidden;
+  padding: 24px 0 16px 0;
+}
+.header {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #176443;
+  text-align: center;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+.slider {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 18px;
+  padding: 0 32px;
+}
+.promoCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(23, 100, 67, 0.06);
+  padding: 18px 16px 14px 16px;
+  min-height: 90px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+  border: 1.5px solid #e6f4f1;
+}
+.promoCard:hover {
+  box-shadow: 0 6px 24px rgba(23, 100, 67, 0.13);
+  transform: translateY(-2px) scale(1.03);
+  border-color: #b2a12c;
+}
+.promoCode {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #176443;
+  margin-bottom: 6px;
+}
+.promoDesc {
+  font-size: 0.98rem;
+  color: #555;
+}
+.active {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.5s;
+  z-index: 2;
+  position: relative;
+}
+.inactive {
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  left: 0; top: 0; width: 100%;
+  z-index: 1;
+}
+.prev, .next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(23,100,67,0.7);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  font-size: 22px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
+}
+.prev:hover, .next:hover {
+  background: #b2a12c;
+}
+.prev { left: 18px; }
+.next { right: 18px; }
+.dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0 0 0;
+  gap: 8px;
+}
+.dot, .dotActive {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #e6f4f1;
+  display: inline-block;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.dotActive {
+  background: #176443;
+}
+.promoImg {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  margin-right: 8px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(23,100,67,0.08);
+  display: block;
+}
+.promoRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.promoImgCircle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(23,100,67,0.10);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+.promoImg {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #fff;
+  display: block;
+}
+.promoContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.promoTitle {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 2px;
+}
+.promoDesc {
+  font-size: 0.98rem;
+  color: #555;
+  margin-bottom: 4px;
+}
+.promoStatus {
+  font-size: 0.93rem;
+  margin-bottom: 4px;
+  color: #d84315;
+  font-weight: 500;
+}
+.promoRemain {
+  color: #d84315;
+  font-weight: 600;
+}
+.promoExpire {
+  color: #b2a12c;
+  font-weight: 500;
+}
+.promoProgressBar {
+  width: 100%;
+  height: 6px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  margin-top: 2px;
+  overflow: hidden;
+}
+.promoProgress {
+  height: 100%;
+  background: linear-gradient(90deg, #ff9800 0%, #d84315 100%);
+  border-radius: 4px;
+  transition: width 0.4s;
+}
+.promoActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.promoDetail {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 8px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.promoDetail:hover {
+  background: #e3f2fd;
+}
+.promoCopy {
+  background: #222;
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 6px;
+  padding: 4px 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.promoCopy:hover {
+  background: #176443;
+}
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 14px;
+  }
+  .promoRow { gap: 10px; }
+  .promoImgCircle { width: 38px; height: 38px; }
+  .promoImg { width: 24px; height: 24px; }
+}
+@media (max-width: 700px) {
+  .sliderWrapper {
+    padding: 12px 0 8px 0;
+  }
+  .grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(10, 1fr);
+    gap: 10px;
+    padding: 0 8px;
+  }
+  .promoCard {
+    min-height: 60px;
+    padding: 10px 8px 8px 8px;
+  }
+  .promoImg {
+    width: 28px;
+    height: 28px;
+    margin-bottom: 6px;
+    margin-right: 6px;
+  }
+  .promoRow { gap: 8px; }
+  .promoImgCircle { width: 28px; height: 28px; }
+  .promoImg { width: 18px; height: 18px; }
+  .promoTitle { font-size: 1rem; }
+  .promoDesc, .promoStatus { font-size: 0.92rem; }
+  .promoCopy, .promoDetail { font-size: 0.95rem; }
+} 

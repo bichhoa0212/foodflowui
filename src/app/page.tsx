@@ -21,6 +21,8 @@ import ProductFilterBar from '@/components/ProductFilterBar';
 import ProductList from '@/components/ProductList';
 import { publicAPI } from '@/lib/publicApi';
 import styles from './HomePage.module.css';
+import ImageSlider from '@/components/ImageSlider';
+import PromoCodeSlider from '@/components/PromoCodeSlider';
 
 /**
  * Trang chủ FlowMarket
@@ -93,7 +95,7 @@ const HomePage = () => {
 
   return (
     <>
-      {/* Hero Section */}
+    
       <Box className={styles.hero}>
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
@@ -134,6 +136,13 @@ const HomePage = () => {
           </Grid>
         </Container>
       </Box>
+        {/* Banner 13 năm */}
+        {/* <Box style={{ background: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '32px 0' }}>
+        <img src="https://theme.hstatic.net/1000282430/1001088848/14/slideshow_2.jpg?v=1558" alt="13th Anniversary" style={{ maxWidth: '100%', borderRadius: 18, boxShadow: '0 2px 16px rgba(23,100,67,0.08)' }} />
+        </Box> */}
+      <PromoCodeSlider />
+      {/* Hero Section */}
+
       {/* Features Section */}
       <Container maxWidth="lg" className={styles.featuresSection}>
         <Typography variant="h3" component="h2" gutterBottom className={styles.featuresTitle}>
