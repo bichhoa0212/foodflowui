@@ -1,5 +1,6 @@
 {
-  "name": "foodflowui",
+  "name": "flowmarket",
+  "description": "FlowMarket - Siêu thị cá nhân cho một người bán hàng. Ứng dụng bán hàng online cho cá nhân quản lý sản phẩm và khách hàng mua sắm.",
   "version": "0.1.0",
   "private": true,
   "scripts": {

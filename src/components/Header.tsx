@@ -52,7 +52,7 @@ const Header: React.FC = () => {
       <Toolbar className={styles.toolbar}>
         <span className={styles.logo}><Restaurant /></span>
         <Typography variant="h6" component="div" className={styles.flexGrow}>
-          FoodFlow
+          FlowMarket
         </Typography>
         {authenticated ? (
           <div className={styles.userMenu}>

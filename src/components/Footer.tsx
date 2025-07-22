@@ -11,9 +11,9 @@ const Footer: React.FC = () => (
       <div className={styles.grid}>
         {/* Thông tin app */}
         <div className={styles.section}>
-          <h2>FoodFlow</h2>
+          <h2>FlowMarket</h2>
           <p>
-            Nền tảng đặt đồ ăn trực tuyến hàng đầu Việt Nam, kết nối người dùng với hàng nghìn nhà hàng uy tín.
+            Siêu thị cá nhân - Nền tảng bán hàng trực tuyến cho cá nhân, cung cấp sản phẩm chất lượng, giao hàng nhanh chóng.
           </p>
         </div>
         {/* Liên kết */}
@@ -28,14 +28,14 @@ const Footer: React.FC = () => (
         {/* Liên hệ */}
         <div className={styles.section}>
           <h2>Liên hệ</h2>
-          <p>Email: support@foodflow.com<br />
+          <p>Email: support@flowmarket.com<br />
             Hotline: 1900-xxxx<br />
             Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM
           </p>
         </div>
       </div>
       <div className={styles.copyright}>
-        © 2024 FoodFlow. Tất cả quyền được bảo lưu.
+        © 2024 FlowMarket. Tất cả quyền được bảo lưu.
       </div>
     </div>
   </footer>

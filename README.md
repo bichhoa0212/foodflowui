@@ -1,6 +1,12 @@
-# FoodFlow UI
+# FlowMarket
 
-Frontend ứng dụng đặt đồ ăn trực tuyến FoodFlow được xây dựng bằng Next.js và Material-UI.
+FlowMarket là ứng dụng siêu thị cá nhân cho một người bán hàng. Cho phép cá nhân quản lý sản phẩm, khách hàng đăng ký/mua hàng trực tuyến.
+
+## Tính năng chính
+- Đăng ký/Đăng nhập cho khách hàng
+- Quản lý sản phẩm (dành cho người bán)
+- Giỏ hàng, đặt hàng
+- Giao diện hiện đại, dễ sử dụng
 
 ## Tính năng
 
