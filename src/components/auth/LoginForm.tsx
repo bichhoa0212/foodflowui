@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { AuthRequest } from '@/lib/authApi';
-import { generateChecksum, validatePhone, validateEmail } from '@/lib/utils';
+import { generateChecksum, validatePhone, validateEmail, detectProvider } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 // Schema validation cho form đăng nhập
@@ -53,11 +53,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegister }) 
   const providerUserId = watch('providerUserId');
 
   // Tự động nhận diện loại tài khoản
-  const detectProvider = (input: string): string => {
-    if (validateEmail(input)) return 'EMAIL';
-    if (validatePhone(input)) return 'PHONE';
-    return 'PHONE'; // Mặc định là phone
-  };
+  // const detectProvider = (input: string): string => {
+  //   if (validateEmail(input)) return 'EMAIL';
+  //   if (validatePhone(input)) return 'PHONE';
+  //   return 'PHONE'; // Mặc định là phone
+  // };
 
   /**
    * Xử lý submit form đăng nhập

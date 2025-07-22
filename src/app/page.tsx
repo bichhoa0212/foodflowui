@@ -140,6 +140,7 @@ const HomePage = () => {
         {/* <Box style={{ background: '#fff', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '32px 0' }}>
         <img src="https://theme.hstatic.net/1000282430/1001088848/14/slideshow_2.jpg?v=1558" alt="13th Anniversary" style={{ maxWidth: '100%', borderRadius: 18, boxShadow: '0 2px 16px rgba(23,100,67,0.08)' }} />
         </Box> */}
+        <ImageSlider />
       <PromoCodeSlider />
       {/* Hero Section */}
 

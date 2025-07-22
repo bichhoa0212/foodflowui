@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { authAPI, RegisterRequest } from '@/lib/authApi';
-import { generateChecksum, validatePhone, validateEmail } from '@/lib/utils';
+import { generateChecksum, validatePhone, validateEmail, detectProvider } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 const registerSchema = yup.object({
@@ -79,8 +79,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchToLogin 
 
   useEffect(() => {
     if (accountValue) {
-      const provider = validateEmail(accountValue) ? 'email' : validatePhone(accountValue) ? 'phone' : null;
-      setDetectedProvider(provider);
+      const provider = detectProvider(accountValue).toLowerCase();
+      setDetectedProvider(provider as 'email' | 'phone');
       if (provider === 'email') {
         setValue('email', accountValue);
         setValue('phone', '');

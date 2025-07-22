@@ -1,20 +1,56 @@
 .filterBar {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 1rem;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 1rem;
 }
 .gridItem {
-  flex: 1 1 180px;
-  min-width: 140px;
+  flex: 1 1 11.25rem;
+  min-width: 8.75rem;
 }
 .input,
 .select {
   width: 100%;
-  padding: 6px 10px;
-  border-radius: 4px;
+  padding: 0.38rem 0.63rem;
+  border-radius: 0.25rem;
   border: 1px solid #ccc;
-  font-size: 15px;
+  font-size: 0.94rem;
   margin-bottom: 0;
+  height: 2.1rem;
+  box-sizing: border-box;
+}
+
+@media (max-width: 900px) {
+  .filterBar {
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .gridItem {
+    flex: 1 1 8.75rem;
+    min-width: 6.25rem;
+  }
+  .input, .select {
+    font-size: 0.9rem;
+    padding: 0.25rem 0.5rem;
+    height: 1.7rem;
+  }
+}
+@media (max-width: 600px) {
+  .filterBar {
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-bottom: 0.2rem;
+    align-items: stretch;
+  }
+  .gridItem {
+    flex: 1 1 100%;
+    min-width: 100%;
+    margin-bottom: 0.1rem;
+  }
+  .input, .select {
+    font-size: 0.85rem;
+    padding: 0.12rem 0.2rem;
+    height: 1.2rem;
+  }
 } 

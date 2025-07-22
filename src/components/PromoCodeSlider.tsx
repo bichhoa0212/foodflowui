@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import styles from './PromoCodeSlider.module.css';
+import BaseSlider from './BaseSlider';
 
 interface PromoCode {
   code: string;
@@ -22,24 +23,31 @@ const mockFetchPromoCodes = (): Promise<PromoCode[]> => {
     { code: 'GIFT2024', title: 'Tặng quà 2024', description: 'Tặng kèm đơn hàng', color: '#fce4ec', image: 'https://cdn-icons-png.flaticon.com/512/1256/1256650.png', remaining: 30, expireInDays: 5 },
     { code: 'FLASHSALE', title: 'Flash Sale cuối tuần', description: 'Giảm 15%', color: '#f9fbe7', image: 'https://cdn-icons-png.flaticon.com/512/992/992700.png', remaining: 70, expireInDays: 2 },
     { code: 'WELCOMENEW', title: 'Chào mừng khách mới', description: 'Giảm 25k', color: '#f1f8e9', image: 'https://cdn-icons-png.flaticon.com/512/3135/3135768.png', remaining: 99, expireInDays: 10 },
-    { code: 'EXTRA5', title: 'Thêm 5% cho đơn trên 500k', description: 'Áp dụng toàn bộ sản phẩm', color: '#ede7f6', image: 'https://cdn-icons-png.flaticon.com/512/1828/1828919.png', remaining: 60, expireInDays: 8 },
   ]);
+};
+
+const getVisibleCount = (width: number) => {
+  if (width <= 700) return 1;
+  if (width <= 1100) return 3;
+  return 5;
 };
 
 const PromoCodeSlider: React.FC = () => {
   const [codes, setCodes] = useState<PromoCode[]>([]);
-  const [current, setCurrent] = useState(0);
-  const perSlide = 10; // 2 hàng x 5 cột
   const [copied, setCopied] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(getVisibleCount(typeof window !== 'undefined' ? window.innerWidth : 1200));
 
   useEffect(() => {
     mockFetchPromoCodes().then(setCodes);
   }, []);
 
-  const slides = [];
-  for (let i = 0; i < codes.length; i += perSlide) {
-    slides.push(codes.slice(i, i + perSlide));
-  }
+  useEffect(() => {
+    const handleResize = () => {
+      setVisibleCount(getVisibleCount(window.innerWidth));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleCopy = (code: string) => {
     navigator.clipboard.writeText(code);
@@ -52,64 +60,53 @@ const PromoCodeSlider: React.FC = () => {
   return (
     <div className={styles.sliderWrapper}>
       <div className={styles.header}>Mã khuyến mãi</div>
-      <div className={styles.slider}>
-        {slides.map((slide, idx) => (
-          <div
-            key={idx}
-            className={idx === current ? styles.active : styles.inactive}
-          >
-            <div className={styles.grid}>
-              {slide.map((promo, i) => (
-                <div
-                  key={promo.code}
-                  className={styles.promoCard}
-                  style={{ background: promo.color || '#f5f5f5' }}
-                >
-                  <div className={styles.promoRow}>
-                    <div className={styles.promoImgCircle}>
-                      <img src={promo.image} alt={promo.code} className={styles.promoImg} />
-                    </div>
-                    <div className={styles.promoContent}>
-                      <div className={styles.promoTitle}>{promo.title}</div>
-                      <div className={styles.promoDesc}>{promo.description}</div>
-                      <div className={styles.promoStatus}>
-                        <span className={styles.promoRemain}>Còn {promo.remaining} mã</span>,
-                        <span className={styles.promoExpire}> hết hạn trong {promo.expireInDays} ngày</span>
-                      </div>
-                      <div className={styles.promoProgressBar}>
-                        <div
-                          className={styles.promoProgress}
-                          style={{ width: `${Math.max(5, Math.min(100, (promo.remaining / 200) * 100))}%` }}
-                        />
-                      </div>
-                      <div className={styles.promoActions}>
-                        <button className={styles.promoDetail}>Chi tiết</button>
-                        <button
-                          className={styles.promoCopy}
-                          onClick={() => handleCopy(promo.code)}
-                        >
-                          {copied === promo.code ? 'Đã sao chép!' : 'Sao chép'}
-                        </button>
-                      </div>
-                    </div>
+      <BaseSlider
+        items={codes}
+        renderItem={(promo) => (
+          <div className={styles.grid} style={{ gridTemplateColumns: '1fr', gridTemplateRows: '1fr' }}>
+            <div
+              className={styles.promoCard}
+              style={{ background: promo.color || '#f5f5f5', margin: '0 auto', maxWidth: 320 }}
+            >
+              <div className={styles.promoRow}>
+                <div className={styles.promoImgCircle}>
+                  <img src={promo.image} alt={promo.code} className={styles.promoImg} />
+                </div>
+                <div className={styles.promoContent}>
+                  <div className={styles.promoTitle}>{promo.title}</div>
+                  <div className={styles.promoDesc}>{promo.description}</div>
+                  <div className={styles.promoStatus}>
+                    <span className={styles.promoRemain}>Còn {promo.remaining} mã</span>,
+                    <span className={styles.promoExpire}> hết hạn trong {promo.expireInDays} ngày</span>
+                  </div>
+                  <div className={styles.promoProgressBar}>
+                    <div
+                      className={styles.promoProgress}
+                      style={{ width: `${Math.max(5, Math.min(100, (promo.remaining / 200) * 100))}%` }}
+                    />
+                  </div>
+                  <div className={styles.promoActions}>
+                    <button className={styles.promoDetail}>Chi tiết</button>
+                    <button
+                      className={styles.promoCopy}
+                      onClick={() => handleCopy(promo.code)}
+                    >
+                      {copied === promo.code ? 'Đã sao chép!' : 'Sao chép'}
+                    </button>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           </div>
-        ))}
-        <button className={styles.prev} onClick={() => setCurrent((current - 1 + slides.length) % slides.length)}>&lt;</button>
-        <button className={styles.next} onClick={() => setCurrent((current + 1) % slides.length)}>&gt;</button>
-      </div>
-      <div className={styles.dots}>
-        {slides.map((_, idx) => (
-          <span
-            key={idx}
-            className={idx === current ? styles.dotActive : styles.dot}
-            onClick={() => setCurrent(idx)}
-          />
-        ))}
-      </div>
+        )}
+        customClass={styles.slider}
+        interval={4000}
+        autoPlay
+        dots
+        arrows
+        arrowClassName={styles.arrow}
+        visibleCount={visibleCount}
+      />
     </div>
   );
 };

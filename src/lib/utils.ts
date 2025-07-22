@@ -119,4 +119,15 @@ export const getUserInfo = () => {
   } catch (error) {
     return null;
   }
+};
+
+/**
+ * Tự động nhận diện loại tài khoản (email/phone)
+ * @param input - chuỗi nhập vào
+ * @returns 'EMAIL' | 'PHONE'
+ */
+export const detectProvider = (input: string): 'EMAIL' | 'PHONE' => {
+  if (validateEmail(input)) return 'EMAIL';
+  if (validatePhone(input)) return 'PHONE';
+  return 'PHONE'; // Mặc định là phone
 }; 

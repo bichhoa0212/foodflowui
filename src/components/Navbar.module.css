@@ -4,14 +4,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 56px;
+  min-height: 3.5rem;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(23, 100, 67, 0.06);
+  box-shadow: 0 0.125rem 0.5rem rgba(23, 100, 67, 0.06);
 }
 .menuList {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 1.5rem;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -22,33 +22,74 @@
   background: #b2a12c;
   color: #fff;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 1.13rem;
   border: none;
-  border-radius: 28px;
-  padding: 8px 28px 8px 20px;
+  border-radius: 1.75rem;
+  padding: 0.5rem 1.75rem 0.5rem 1.25rem;
   cursor: pointer;
   transition: background 0.2s, box-shadow 0.2s;
   outline: none;
-  box-shadow: 0 2px 8px rgba(178, 161, 44, 0.10);
+  box-shadow: 0 0.125rem 0.5rem rgba(178, 161, 44, 0.10);
 }
 .categoryButton:hover {
   background: #a3931d;
-  box-shadow: 0 4px 16px rgba(178, 161, 44, 0.18);
+  box-shadow: 0 0.25rem 1rem rgba(178, 161, 44, 0.18);
 }
 .menuIcon {
-  margin-right: 10px;
-  font-size: 24px !important;
+  margin-right: 0.625rem;
+  font-size: 1.5rem !important;
 }
 .menuItem {
   color: #fff;
   font-weight: 700;
-  font-size: 17px;
+  font-size: 1.06rem;
   cursor: pointer;
   transition: color 0.2s, background 0.2s;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 0.38rem 0.75rem;
+  border-radius: 0.38rem;
 }
 .menuItem:hover {
   color: #b2a12c;
   background: rgba(255,255,255,0.08);
+}
+
+@media (max-width: 900px) {
+  .menuList {
+    gap: 0.7rem;
+  }
+  .categoryButton {
+    font-size: 1rem;
+    padding: 0.4rem 1rem 0.4rem 0.7rem;
+  }
+  .menuIcon {
+    font-size: 1.1rem !important;
+    margin-right: 0.3rem;
+  }
+  .menuItem {
+    font-size: 0.95rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+@media (max-width: 600px) {
+  .navbar {
+    min-height: 2.2rem;
+  }
+  .menuList {
+    flex-direction: column;
+    gap: 0.2rem;
+    width: 100%;
+    align-items: flex-start;
+    padding: 0.2rem 0.5rem;
+  }
+  .categoryButton {
+    font-size: 0.95rem;
+    padding: 0.2rem 0.7rem 0.2rem 0.4rem;
+    border-radius: 1rem;
+  }
+  .menuItem {
+    font-size: 0.9rem;
+    padding: 0.18rem 0.3rem;
+    border-radius: 0.2rem;
+    width: 100%;
+  }
 } 
