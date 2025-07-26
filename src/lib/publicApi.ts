@@ -48,10 +48,23 @@ export const publicAPI = {
    * @returns Promise<AxiosResponse>
    */
   getTopPurchasedProducts: () => api.get('/products/top-purchased'),
+  
   /**
-   * Lấy top sản phẩm được review nhiều
+   * Lấy top sản phẩm được đánh giá nhiều nhất
    * @returns Promise<AxiosResponse>
    */
   getTopReviewedProducts: () => api.get('/products/top-reviewed'),
-  // Đã loại bỏ các hàm liên quan đến nhà hàng (restaurant)
+  
+  /**
+   * Lấy top 10 sản phẩm bán chạy nhất (public API)
+   * @returns Promise<AxiosResponse>
+   */
+  getTopSellingProducts: () => api.get('/public/products/top-selling'),
+  
+  /**
+   * Lấy top 10 sản phẩm có khuyến mãi (public API)
+   * @returns Promise<AxiosResponse>
+   */
+  getTopDiscountedProducts: () => api.get('/public/products/top-discounted'),
+
 };

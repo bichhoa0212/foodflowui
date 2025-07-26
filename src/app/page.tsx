@@ -19,6 +19,7 @@ import {
 import { useRouter } from 'next/navigation';
 import ProductFilterBar from '@/components/ProductFilterBar';
 import ProductList from '@/components/ProductList';
+import ProductSlider from '@/components/ProductSlider';
 import { publicAPI } from '@/lib/publicApi';
 import styles from './HomePage.module.css';
 import ImageSlider from '@/components/ImageSlider';
@@ -44,12 +45,61 @@ const HomePage = () => {
   const [search, setSearch] = useState('');
   const [topProducts, setTopProducts] = useState<any[]>([]);
   const [topReviewedProducts, setTopReviewedProducts] = useState<any[]>([]);
+  const [topDiscountedProducts, setTopDiscountedProducts] = useState<any[]>([]);
+  const [topProductsLoading, setTopProductsLoading] = useState(false);
+  const [topReviewedProductsLoading, setTopReviewedProductsLoading] = useState(false);
+  const [topDiscountedProductsLoading, setTopDiscountedProductsLoading] = useState(false);
   // Đã loại bỏ các state liên quan đến nhà hàng
 
   // Lấy dữ liệu top và categories khi mount
   useEffect(() => {
     publicAPI.getCategories({ page: 0, size: 50 })
       .then(res => setCategories(res.data.data.data || res.data.data.content || []));
+    
+    // Lấy top 10 sản phẩm bán chạy
+    setTopProductsLoading(true);
+    publicAPI.getTopSellingProducts()
+      .then((res: any) => {
+        console.log('Top selling products response:', res);
+        if (res.data && res.data.data) {
+          setTopProducts(res.data.data);
+        }
+      })
+      .catch((error: any) => {
+        console.error('Error fetching top selling products:', error);
+      })
+      .finally(() => {
+        setTopProductsLoading(false);
+      });
+    
+    // Lấy top 10 sản phẩm được đánh giá nhiều nhất
+    setTopReviewedProductsLoading(true);
+    publicAPI.getTopReviewedProducts()
+      .then((res: any) => {
+        console.log('Top reviewed products response:', res);
+        if (res.data && res.data.data) {
+          setTopReviewedProducts(res.data.data);
+        }
+      })
+      .catch((error: any) => {
+        console.error('Error fetching top reviewed products:', error);
+      })
+      .finally(() => {
+        setTopReviewedProductsLoading(false);
+      });
+
+    // Lấy top 10 sản phẩm có khuyến mãi
+    setTopDiscountedProductsLoading(true);
+    publicAPI.getTopDiscountedProducts()
+      .then((res: any) => {
+        console.log('Top discounted products response:', res);
+        if (res.data && res.data.data) {
+          setTopDiscountedProducts(res.data.data);
+        }
+      })
+      .finally(() => {
+        setTopDiscountedProductsLoading(false); 
+      });
     // Đã loại bỏ các API gọi nhà hàng
   }, []);
 
@@ -175,13 +225,26 @@ const HomePage = () => {
         </Grid>
       </Container>
       {/* Top sản phẩm nổi bật */}
-      <Container maxWidth="lg" className={styles.topSection}>
-        <Typography variant="h4" component="h2" gutterBottom className={styles.topTitle}>Top 10 sản phẩm bán chạy nhất</Typography>
-        <ProductList products={topProducts} loading={false} page={0} size={10} total={topProducts.length} setPage={() => {}} hidePagination />
+      <Container maxWidth="lg">
+        <ProductSlider 
+          products={topProducts} 
+          loading={topProductsLoading} 
+          title="Top 10 sản phẩm bán chạy nhất" 
+        />
       </Container>
-      <Container maxWidth="lg" className={styles.topSection}>
-        <Typography variant="h4" component="h2" gutterBottom className={styles.topTitle}>Top 10 sản phẩm được đánh giá nhiều nhất</Typography>
-        <ProductList products={topReviewedProducts} loading={false} page={0} size={10} total={topReviewedProducts.length} setPage={() => {}} hidePagination />
+      <Container maxWidth="lg">
+        <ProductSlider 
+          products={topReviewedProducts} 
+          loading={topReviewedProductsLoading} 
+          title="Top 10 sản phẩm được đánh giá nhiều nhất" 
+        />
+      </Container>
+      <Container maxWidth="lg">
+        <ProductSlider 
+          products={topDiscountedProducts} 
+          loading={topDiscountedProductsLoading} 
+          title="Top 10 sản phẩm có khuyến mãi" 
+        />
       </Container>
       {/* Filter + Product List Section */}
       <Container maxWidth="lg" className={styles.filterSection}>
