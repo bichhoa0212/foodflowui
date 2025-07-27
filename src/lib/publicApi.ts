@@ -66,5 +66,18 @@ export const publicAPI = {
    * @returns Promise<AxiosResponse>
    */
   getTopDiscountedProducts: () => api.get('/public/products/top-discounted'),
+  
+  /**
+   * Lấy top 10 sản phẩm mới nhất (public API)
+   * @returns Promise<AxiosResponse>
+   */
+  getTopNewestProducts: () => api.get('/public/products/top-newest'),
+  
+  /**
+   * Tìm kiếm sản phẩm theo tên (public API)
+   * @param name tên sản phẩm cần tìm
+   * @returns Promise<AxiosResponse>
+   */
+  searchProducts: (name: string) => api.get(`/public/products/search?name=${encodeURIComponent(name)}`),
 
 };

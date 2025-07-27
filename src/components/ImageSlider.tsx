@@ -36,6 +36,7 @@ const ImageSlider: React.FC = () => {
       autoPlay
       dots
       arrows
+      arrowClassName={styles.arrow}
     />
   );
 };

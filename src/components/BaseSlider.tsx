@@ -1,4 +1,5 @@
 import React, { useEffect, useState, ReactNode } from 'react';
+import { ChevronLeft, ChevronRight } from '@mui/icons-material';
 
 interface BaseSliderProps<T> {
   items: T[];
@@ -59,14 +60,14 @@ function BaseSlider<T>({
               style={{ position: 'absolute', left: 0, top: '50%', zIndex: 10, transform: 'translateY(-50%)' }}
               onClick={() => setCurrent((current - 1 + total) % total)}
             >
-              &#8592;
+              <ChevronLeft />
             </button>
             <button
               className={arrowClassName}
               style={{ position: 'absolute', right: 0, top: '50%', zIndex: 10, transform: 'translateY(-50%)' }}
               onClick={() => setCurrent((current + 1) % total)}
             >
-              &#8594;
+              <ChevronRight />
             </button>
           </>
         )}

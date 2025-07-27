@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import ProductFilterBar from '@/components/ProductFilterBar';
 import ProductList from '@/components/ProductList';
 import ProductSlider from '@/components/ProductSlider';
+import FeaturesSection from '@/components/FeaturesSection';
 import { publicAPI } from '@/lib/publicApi';
 import styles from './HomePage.module.css';
 import ImageSlider from '@/components/ImageSlider';
@@ -49,6 +50,8 @@ const HomePage = () => {
   const [topProductsLoading, setTopProductsLoading] = useState(false);
   const [topReviewedProductsLoading, setTopReviewedProductsLoading] = useState(false);
   const [topDiscountedProductsLoading, setTopDiscountedProductsLoading] = useState(false);
+  const [topNewestProducts, setTopNewestProducts] = useState<any[]>([]);
+  const [topNewestProductsLoading, setTopNewestProductsLoading] = useState(false);
   // Đã loại bỏ các state liên quan đến nhà hàng
 
   // Lấy dữ liệu top và categories khi mount
@@ -100,7 +103,19 @@ const HomePage = () => {
       .finally(() => {
         setTopDiscountedProductsLoading(false); 
       });
-    // Đã loại bỏ các API gọi nhà hàng
+
+    // Lấy top 10 sản phẩm mới nhất
+    setTopNewestProductsLoading(true);
+    publicAPI.getTopNewestProducts()
+      .then((res: any) => {
+        console.log('Top newest products response:', res);
+        if (res.data && res.data.data) {
+          setTopNewestProducts(res.data.data);
+        }
+      })
+      .finally(() => {
+        setTopNewestProductsLoading(false);
+      });
   }, []);
 
   // Lấy danh sách sản phẩm theo filter
@@ -224,6 +239,23 @@ const HomePage = () => {
           ))}
         </Grid>
       </Container>
+
+      {/* Top sản phẩm mới nhất */}
+      <Container maxWidth="lg">
+        <ProductSlider 
+          products={topNewestProducts} 
+          loading={topNewestProductsLoading} 
+          title="Top 10 sản phẩm mới nhất" 
+        />
+      </Container>
+        {/* Top sản phẩm có khuyến mãi */}
+        <Container maxWidth="lg">
+        <ProductSlider 
+          products={topDiscountedProducts} 
+          loading={topDiscountedProductsLoading} 
+          title="Top 10 sản phẩm có khuyến mãi" 
+        />
+      </Container>
       {/* Top sản phẩm nổi bật */}
       <Container maxWidth="lg">
         <ProductSlider 
@@ -232,20 +264,11 @@ const HomePage = () => {
           title="Top 10 sản phẩm bán chạy nhất" 
         />
       </Container>
-      <Container maxWidth="lg">
-        <ProductSlider 
-          products={topReviewedProducts} 
-          loading={topReviewedProductsLoading} 
-          title="Top 10 sản phẩm được đánh giá nhiều nhất" 
-        />
-      </Container>
-      <Container maxWidth="lg">
-        <ProductSlider 
-          products={topDiscountedProducts} 
-          loading={topDiscountedProductsLoading} 
-          title="Top 10 sản phẩm có khuyến mãi" 
-        />
-      </Container>
+    
+      
+      {/* Features Section */}
+      <FeaturesSection />
+      
       {/* Filter + Product List Section */}
       <Container maxWidth="lg" className={styles.filterSection}>
         <ProductFilterBar

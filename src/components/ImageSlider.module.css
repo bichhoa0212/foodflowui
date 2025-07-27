@@ -55,6 +55,40 @@
 }
 .prev { left: 1.125rem; }
 .next { right: 1.125rem; }
+
+.arrow {
+  background: #176443 !important;
+  border: none;
+  color: white !important;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 20;
+  padding: 0;
+}
+
+.arrow .MuiSvgIcon-root {
+  color: white !important;
+  font-size: 1.5rem !important;
+}
+
+.arrow:hover {
+  background: #0f4a2f !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.arrow:hover .MuiSvgIcon-root {
+  color: white !important;
+}
 .dots {
   display: flex;
   justify-content: center;

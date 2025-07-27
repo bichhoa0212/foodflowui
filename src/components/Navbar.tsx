@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
           )}
         </li>
         <li className={styles.menuItem}>Giỏ quà tặng</li>
-        <li className={styles.menuItem}>Về Nam An</li>
+        <li className={styles.menuItem}>Về FlowMart</li>
         <li className={styles.menuItem}>Tin tức</li>
         <li className={styles.menuItem}>Liên hệ</li>
       </ul>

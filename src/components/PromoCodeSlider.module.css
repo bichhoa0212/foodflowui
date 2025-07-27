@@ -238,25 +238,36 @@
   background: #176443;
 }
 .arrow {
-  background: none;
+  background: #176443 !important;
   border: none;
-  color: #176443;
-  border-radius: 0;
-  width: 1.75rem;
-  height: 1.75rem;
-  font-size: 1.13rem;
+  color: white !important;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1.25rem;
   font-weight: bold;
-  box-shadow: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  transition: all 0.3s ease;
   z-index: 20;
   padding: 0;
 }
+
+.arrow .MuiSvgIcon-root {
+  color: white !important;
+  font-size: 1.5rem !important;
+}
 .arrow:hover {
-  color: #b2a12c;
+  background: #0f4a2f !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.arrow:hover .MuiSvgIcon-root {
+  color: white !important;
 }
 @media (max-width: 1100px) {
   .grid {
@@ -273,9 +284,10 @@
     font-size: 0.9rem;
   }
   .arrow {
-    width: 1.38rem;
-    height: 1.38rem;
-    font-size: 0.9rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1.1rem;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
   }
 }
 @media (max-width: 700px) {
@@ -294,8 +306,9 @@
     font-size: 0.85rem;
   }
   .arrow {
-    width: 1rem;
-    height: 1rem;
-    font-size: 0.7rem;
+    width: 2rem;
+    height: 2rem;
+    font-size: 1rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
   }
 } 
