@@ -34,15 +34,15 @@ const nextConfig: NextConfig = {
       // API rewrite (giữ lại)
       {
         source: "/api/:path*",
-        destination: "http://192.168.21.26:8080/api/:path*",
+        destination: "http://localhost:8080/api/:path*",
       },
     ];
   },
   // Cho phép truy cập dev từ các IP mạng LAN (fix Cross origin request detected)
 
-  allowedDevOrigins: ['*','192.168.21.26', '*.local-origin.dev'],
+  allowedDevOrigins: ['*','192.168.21.26','localhost', '*.local-origin.dev'],
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://192.168.21.26:8080/api",
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api",
     APP_SECRET_KEY: process.env.APP_SECRET_KEY || "793ddabd7c83070cd1ac72877edd9d29",
     JWT_SECRET: process.env.JWT_SECRET || "793ddabd7c83070cd1ac72877edd9d29",
     JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || "793ddabd7c83070cd1ac72877edd9d29",

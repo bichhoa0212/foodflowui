@@ -23,6 +23,10 @@ import {
   ListItemText,
   ListItemIcon,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   Person,
@@ -45,7 +49,11 @@ import {
 } from '@mui/icons-material';
 import { ListItemButton } from '@mui/material';
 import { useAuth } from '@/contexts/AuthContext';
+import { userProfileApi, UserProfileDto, UserAddressDto, UserFavoriteDto, PageData } from '@/lib/userProfileApi';
 import styles from './Profile.module.css';
+import AvatarUpload from './AvatarUpload';
+import { AvatarDebug } from './common/AvatarDebug';
+import { useRouter } from 'next/navigation';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -70,36 +78,117 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const Profile: React.FC = () => {
-  const { userInfo, authenticated, logout } = useAuth();
+  const { userInfo, authenticated, loading: authLoading, logout } = useAuth();
+  const router = useRouter();
   const [tabValue, setTabValue] = useState(0);
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const [addresses, setAddresses] = useState([
-    {
-      id: 1,
-      name: 'Nhà riêng',
-      phone: '0123456789',
-      address: '123 Đường ABC, Quận 1, TP.HCM',
-      isDefault: true
-    },
-    {
-      id: 2,
-      name: 'Công ty',
-      phone: '0987654321',
-      address: '456 Đường XYZ, Quận 3, TP.HCM',
-      isDefault: false
-    }
-  ]);
+  
+  // Profile data
+  const [profileData, setProfileData] = useState<UserProfileDto | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  
+  // Addresses data
+  const [addresses, setAddresses] = useState<UserAddressDto[]>([]);
+  const [addressesLoading, setAddressesLoading] = useState(false);
+  
+  // Favorites data
+  const [favorites, setFavorites] = useState<UserFavoriteDto[]>([]);
+  const [favoritesLoading, setFavoritesLoading] = useState(false);
+  const [favoritesPage, setFavoritesPage] = useState(0);
+  const [favoritesTotal, setFavoritesTotal] = useState(0);
+  
+  // Dialog states
+  const [addressDialogOpen, setAddressDialogOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<UserAddressDto | null>(null);
+  const [newAddress, setNewAddress] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    province: '',
+    district: '',
+    ward: '',
+    isDefault: false,
+    status: 1,
+  });
   
   const [formData, setFormData] = useState({
-    firstName: userInfo?.name?.split(' ')[0] || '',
-    lastName: userInfo?.name?.split(' ').slice(1).join(' ') || '',
-    email: userInfo?.email || '',
-    phone: userInfo?.phone || '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
     address: '',
     avatar: '',
   });
+
+  // Kiểm tra authentication và load data
+  useEffect(() => {
+    if (!authenticated && !authLoading) {
+      router.push('/login');
+      return;
+    }
+    
+    if (authenticated) {
+      loadProfileData();
+      loadAddresses();
+      loadFavorites();
+    }
+  }, [authenticated, authLoading, router]);
+
+  const loadProfileData = async () => {
+    try {
+      setProfileLoading(true);
+      const response = await userProfileApi.getProfile();
+      const profile = response.data.data;
+      setProfileData(profile);
+      
+      // Update form data
+      const nameParts = profile.name?.split(' ') || ['', ''];
+      setFormData({
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        address: profile.address || '',
+        avatar: profile.avatar || '',
+      });
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      setMessage({ type: 'error', text: 'Không thể tải thông tin hồ sơ.' });
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const loadAddresses = async () => {
+    try {
+      setAddressesLoading(true);
+      const response = await userProfileApi.getAddresses();
+      setAddresses(response.data.data);
+    } catch (error) {
+      console.error('Error loading addresses:', error);
+      setMessage({ type: 'error', text: 'Không thể tải danh sách địa chỉ.' });
+    } finally {
+      setAddressesLoading(false);
+    }
+  };
+
+  const loadFavorites = async (page: number = 0) => {
+    try {
+      setFavoritesLoading(true);
+      const response = await userProfileApi.getFavorites(page, 10);
+      const favoritesData: PageData<UserFavoriteDto> = response.data.data;
+      setFavorites(favoritesData.data);
+      setFavoritesTotal(favoritesData.totalElements);
+      setFavoritesPage(page);
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+      setMessage({ type: 'error', text: 'Không thể tải danh sách yêu thích.' });
+    } finally {
+      setFavoritesLoading(false);
+    }
+  };
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -117,15 +206,22 @@ const Profile: React.FC = () => {
     setMessage(null);
     
     try {
-      // Giả lập API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const updateData = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+      };
       
-      // TODO: Gọi API cập nhật thông tin user
-      console.log('Cập nhật thông tin:', formData);
+      await userProfileApi.updateProfile(updateData);
+      
+      // Reload profile data
+      await loadProfileData();
       
       setIsEditing(false);
       setMessage({ type: 'success', text: 'Cập nhật thông tin thành công!' });
     } catch (error) {
+      console.error('Error updating profile:', error);
       setMessage({ type: 'error', text: 'Có lỗi xảy ra khi cập nhật thông tin.' });
     } finally {
       setLoading(false);
@@ -133,45 +229,118 @@ const Profile: React.FC = () => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      firstName: userInfo?.name?.split(' ')[0] || '',
-      lastName: userInfo?.name?.split(' ').slice(1).join(' ') || '',
-      email: userInfo?.email || '',
-      phone: userInfo?.phone || '',
-      address: '',
-      avatar: '',
-    });
+    if (profileData) {
+      const nameParts = profileData.name?.split(' ') || ['', ''];
+      setFormData({
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || '',
+        email: profileData.email || '',
+        phone: profileData.phone || '',
+        address: profileData.address || '',
+        avatar: '',
+      });
+    }
     setIsEditing(false);
     setMessage(null);
   };
 
-  const mockOrders = [
-    { id: 1, date: '2024-01-15', status: 'Đã giao', total: 250000 },
-    { id: 2, date: '2024-01-10', status: 'Đang giao', total: 180000 },
-    { id: 3, date: '2024-01-05', status: 'Đã hủy', total: 120000 },
-  ];
+  // Address handlers
+  const handleAddAddress = () => {
+    setEditingAddress(null);
+    setNewAddress({
+      name: '',
+      phone: '',
+      address: '',
+      province: '',
+      district: '',
+      ward: '',
+      isDefault: false,
+      status: 1,
+    });
+    setAddressDialogOpen(true);
+  };
 
-  const mockFavorites = [
-    { id: 1, name: 'Sản phẩm yêu thích 1', price: 150000 },
-    { id: 2, name: 'Sản phẩm yêu thích 2', price: 200000 },
-    { id: 3, name: 'Sản phẩm yêu thích 3', price: 180000 },
-  ];
+  const handleEditAddress = (address: UserAddressDto) => {
+    setEditingAddress(address);
+    setNewAddress({
+      name: address.name,
+      phone: address.phone,
+      address: address.address,
+      province: address.province,
+      district: address.district,
+      ward: address.ward,
+      isDefault: address.isDefault,
+      status: address.status,
+    });
+    setAddressDialogOpen(true);
+  };
+
+  const handleSaveAddress = async () => {
+    try {
+      setLoading(true);
+      
+      if (editingAddress) {
+        await userProfileApi.updateAddress(editingAddress.id, newAddress);
+        setMessage({ type: 'success', text: 'Cập nhật địa chỉ thành công!' });
+      } else {
+        await userProfileApi.addAddress(newAddress);
+        setMessage({ type: 'success', text: 'Thêm địa chỉ thành công!' });
+      }
+      
+      setAddressDialogOpen(false);
+      await loadAddresses();
+    } catch (error) {
+      console.error('Error saving address:', error);
+      setMessage({ type: 'error', text: 'Có lỗi xảy ra khi lưu địa chỉ.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: number) => {
+    try {
+      setLoading(true);
+      await userProfileApi.deleteAddress(addressId);
+      setMessage({ type: 'success', text: 'Đã xóa địa chỉ!' });
+      await loadAddresses();
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      setMessage({ type: 'error', text: 'Có lỗi xảy ra khi xóa địa chỉ.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetDefaultAddress = async (addressId: number) => {
+    try {
+      setLoading(true);
+      await userProfileApi.setDefaultAddress(addressId);
+      setMessage({ type: 'success', text: 'Đã cập nhật địa chỉ mặc định!' });
+      await loadAddresses();
+    } catch (error) {
+      console.error('Error setting default address:', error);
+      setMessage({ type: 'error', text: 'Có lỗi xảy ra khi đặt địa chỉ mặc định.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveFavorite = async (productId: number) => {
+    try {
+      setLoading(true);
+      await userProfileApi.removeFromFavorites(productId);
+      setMessage({ type: 'success', text: 'Đã xóa khỏi danh sách yêu thích!' });
+      await loadFavorites(favoritesPage);
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+      setMessage({ type: 'error', text: 'Có lỗi xảy ra khi xóa khỏi yêu thích.' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
-  };
-
-  const handleSetDefaultAddress = (id: number) => {
-    setAddresses(prev => prev.map(addr => ({
-      ...addr,
-      isDefault: addr.id === id
-    })));
-    setMessage({ type: 'success', text: 'Đã cập nhật địa chỉ mặc định!' });
-  };
-
-  const handleDeleteAddress = (id: number) => {
-    setAddresses(prev => prev.filter(addr => addr.id !== id));
-    setMessage({ type: 'success', text: 'Đã xóa địa chỉ!' });
   };
 
   if (!authenticated || !userInfo) {
@@ -181,6 +350,19 @@ const Profile: React.FC = () => {
           <CircularProgress />
           <Typography variant="h6" sx={{ mt: 2 }}>
             Đang tải thông tin...
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (profileLoading) {
+    return (
+      <Container maxWidth="lg" className={styles.container}>
+        <Box className={styles.loadingContainer}>
+          <CircularProgress />
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Đang tải thông tin hồ sơ...
           </Typography>
         </Box>
       </Container>
@@ -203,26 +385,35 @@ const Profile: React.FC = () => {
         Hồ sơ cá nhân
       </Typography>
 
+      {/* Debug Component - Remove after fixing */}
+      <AvatarDebug 
+        avatarUrl={profileData?.avatar} 
+        profileData={profileData}
+      />
+
       <Grid container spacing={3}>
         {/* Thông tin cơ bản */}
         <Grid item xs={12} md={4}>
           <Card className={styles.profileCard}>
             <CardContent className={styles.profileHeader}>
-              <Box className={styles.avatarContainer}>
-                <Avatar
-                  src={formData.avatar}
-                  alt={`${formData.firstName} ${formData.lastName}`}
-                  className={styles.avatar}
-                >
-                  {formData.firstName?.charAt(0) || 'U'}
-                </Avatar>
-                <IconButton 
-                  className={styles.editAvatarButton}
-                  size="small"
-                >
-                  <Edit fontSize="small" />
-                </IconButton>
-              </Box>
+              <AvatarUpload
+                currentAvatar={profileData?.avatar || ''}
+                onAvatarChange={(avatarUrl) => {
+                  console.log('Avatar changed to:', avatarUrl);
+                  // Cập nhật cả profileData và formData
+                  setProfileData(prev => prev ? { ...prev, avatar: avatarUrl } : null);
+                  setFormData(prev => ({ ...prev, avatar: avatarUrl }));
+                  setMessage({ type: 'success', text: 'Cập nhật avatar thành công!' });
+                }}
+                onAvatarDelete={() => {
+                  console.log('Avatar deleted');
+                  // Cập nhật cả profileData và formData
+                  setProfileData(prev => prev ? { ...prev, avatar: '' } : null);
+                  setFormData(prev => ({ ...prev, avatar: '' }));
+                  setMessage({ type: 'success', text: 'Xóa avatar thành công!' });
+                }}
+                disabled={!isEditing}
+              />
               
               <Typography variant="h5" className={styles.userName}>
                 {formData.firstName} {formData.lastName}
@@ -354,50 +545,60 @@ const Profile: React.FC = () => {
               <Typography variant="h6" sx={{ mb: 2 }}>
                 Lịch sử đơn hàng
               </Typography>
-              <List>
-                {mockOrders.map((order) => (
-                  <ListItem key={order.id} divider>
-                    <ListItemIcon>
-                      <ShoppingBag />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={`Đơn hàng #${order.id}`}
-                      secondary={`${order.date} - ${order.status}`}
-                    />
-                    <Typography variant="body2" color="primary">
-                      {new Intl.NumberFormat('vi-VN', {
-                        style: 'currency',
-                        currency: 'VND',
-                      }).format(order.total)}
-                    </Typography>
-                  </ListItem>
-                ))}
-              </List>
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="body1" color="text.secondary">
+                  Tính năng này sẽ được phát triển trong phiên bản tiếp theo
+                </Typography>
+              </Box>
             </TabPanel>
 
             {/* Tab Yêu thích */}
             <TabPanel value={tabValue} index={2}>
               <Typography variant="h6" sx={{ mb: 2 }}>
-                Sản phẩm yêu thích
+                Sản phẩm yêu thích ({favoritesTotal})
               </Typography>
-              <List>
-                {mockFavorites.map((item) => (
-                  <ListItem key={item.id} divider>
-                    <ListItemIcon>
-                      <Favorite color="error" />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={item.name}
-                    />
-                    <Typography variant="body2" color="primary">
-                      {new Intl.NumberFormat('vi-VN', {
-                        style: 'currency',
-                        currency: 'VND',
-                      }).format(item.price)}
-                    </Typography>
-                  </ListItem>
-                ))}
-              </List>
+              
+              {favoritesLoading ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : favorites.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    Bạn chưa có sản phẩm yêu thích nào
+                  </Typography>
+                </Box>
+              ) : (
+                <List>
+                  {favorites.map((item) => (
+                    <ListItem key={item.id} divider>
+                      <ListItemIcon>
+                        <Favorite color="error" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={item.productName}
+                        secondary={item.productDescription}
+                      />
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="body2" color="primary">
+                          {new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND',
+                          }).format(item.productPrice)}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleRemoveFavorite(item.productId)}
+                          disabled={loading}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Box>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
             </TabPanel>
 
             {/* Tab Địa chỉ giao hàng */}
@@ -408,59 +609,81 @@ const Profile: React.FC = () => {
                   variant="contained"
                   startIcon={<Add />}
                   color="primary"
+                  onClick={handleAddAddress}
                 >
                   Thêm địa chỉ mới
                 </Button>
               </Box>
               
-              <Grid container spacing={2}>
-                {addresses.map((address) => (
-                  <Grid item xs={12} key={address.id}>
-                    <Card className={styles.addressCard}>
-                      <CardContent>
-                        <Box className={styles.addressHeader}>
-                          <Box>
-                            <Typography variant="h6" className={styles.addressName}>
-                              {address.name}
-                              {address.isDefault && (
-                                <Chip 
-                                  label="Mặc định" 
-                                  size="small" 
-                                  color="primary" 
-                                  sx={{ ml: 1 }}
-                                />
+              {addressesLoading ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : addresses.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    Bạn chưa có địa chỉ giao hàng nào
+                  </Typography>
+                </Box>
+              ) : (
+                <Grid container spacing={2}>
+                  {addresses.map((address) => (
+                    <Grid item xs={12} key={address.id}>
+                      <Card className={styles.addressCard}>
+                        <CardContent>
+                          <Box className={styles.addressHeader}>
+                            <Box>
+                              <Typography variant="h6" className={styles.addressName}>
+                                {address.name}
+                                {address.isDefault && (
+                                  <Chip 
+                                    label="Mặc định" 
+                                    size="small" 
+                                    color="primary" 
+                                    sx={{ ml: 1 }}
+                                  />
+                                )}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                {address.phone}
+                              </Typography>
+                            </Box>
+                            <Box className={styles.addressActions}>
+                              {!address.isDefault && (
+                                <Button
+                                  size="small"
+                                  onClick={() => handleSetDefaultAddress(address.id)}
+                                  disabled={loading}
+                                >
+                                  Đặt mặc định
+                                </Button>
                               )}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              {address.phone}
-                            </Typography>
-                          </Box>
-                          <Box className={styles.addressActions}>
-                            {!address.isDefault && (
                               <Button
                                 size="small"
-                                onClick={() => handleSetDefaultAddress(address.id)}
+                                onClick={() => handleEditAddress(address)}
+                                disabled={loading}
                               >
-                                Đặt mặc định
+                                Sửa
                               </Button>
-                            )}
-                            <IconButton
-                              size="small"
-                              color="error"
-                              onClick={() => handleDeleteAddress(address.id)}
-                            >
-                              <Delete />
-                            </IconButton>
+                              <IconButton
+                                size="small"
+                                color="error"
+                                onClick={() => handleDeleteAddress(address.id)}
+                                disabled={loading}
+                              >
+                                <Delete />
+                              </IconButton>
+                            </Box>
                           </Box>
-                        </Box>
-                        <Typography variant="body1" sx={{ mt: 1 }}>
-                          {address.address}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
+                          <Typography variant="body1" sx={{ mt: 1 }}>
+                            {address.address}, {address.ward}, {address.district}, {address.province}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
             </TabPanel>
 
             {/* Tab Cài đặt */}
@@ -511,6 +734,84 @@ const Profile: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Dialog thêm/sửa địa chỉ */}
+      <Dialog 
+        open={addressDialogOpen} 
+        onClose={() => setAddressDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingAddress ? 'Sửa địa chỉ' : 'Thêm địa chỉ mới'}
+        </DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Tên địa chỉ"
+                value={newAddress.name}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Số điện thoại"
+                value={newAddress.phone}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, phone: e.target.value }))}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Địa chỉ chi tiết"
+                multiline
+                rows={3}
+                value={newAddress.address}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, address: e.target.value }))}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Tỉnh/Thành phố"
+                value={newAddress.province}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, province: e.target.value }))}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Quận/Huyện"
+                value={newAddress.district}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, district: e.target.value }))}
+              />
+            </Grid>
+            <Grid item xs={12} sm={4}>
+              <TextField
+                fullWidth
+                label="Phường/Xã"
+                value={newAddress.ward}
+                onChange={(e) => setNewAddress(prev => ({ ...prev, ward: e.target.value }))}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddressDialogOpen(false)}>
+            Hủy
+          </Button>
+          <Button 
+            onClick={handleSaveAddress} 
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} /> : 'Lưu'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

@@ -74,10 +74,18 @@ const Navbar: React.FC = () => {
             </div>
           )}
         </li>
-        <li className={styles.menuItem}>Giỏ quà tặng</li>
-        <li className={styles.menuItem}>Về FlowMart</li>
-        <li className={styles.menuItem}>Tin tức</li>
-        <li className={styles.menuItem}>Liên hệ</li>
+        <li className={styles.menuItem}>
+          <a href="/gift-basket" className={styles.menuLink}>Giỏ quà tặng</a>
+        </li>
+        <li className={styles.menuItem}>
+          <a href="/about" className={styles.menuLink}>Về FlowMart</a>
+        </li>
+        <li className={styles.menuItem}>
+          <a href="/news" className={styles.menuLink}>Tin tức</a>
+        </li>
+        <li className={styles.menuItem}>
+          <a href="/contact" className={styles.menuLink}>Liên hệ</a>
+        </li>
       </ul>
     </nav>
   );

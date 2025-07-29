@@ -122,6 +122,66 @@ export const getUserInfo = () => {
 };
 
 /**
+ * Kiểm tra token có sắp hết hạn không
+ * @returns true nếu token còn hợp lệ, false nếu sắp hết hạn hoặc đã hết hạn
+ */
+export const isTokenExpiringSoon = (): boolean => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return false;
+  
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiryTime = payload.exp * 1000; // ms
+    const currentTime = Date.now();
+    const timeUntilExpiry = expiryTime - currentTime;
+    
+    // Trả về true nếu còn ít hơn 5 phút
+    return timeUntilExpiry < 5 * 60 * 1000;
+  } catch (error) {
+    return false;
+  }
+};
+
+/**
+ * Kiểm tra token đã hết hạn chưa
+ * @returns true nếu token đã hết hạn, false nếu còn hợp lệ
+ */
+export const isTokenExpired = (): boolean => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return true;
+  
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiryTime = payload.exp * 1000; // ms
+    const currentTime = Date.now();
+    
+    return currentTime >= expiryTime;
+  } catch (error) {
+    return true;
+  }
+};
+
+/**
+ * Lấy thời gian còn lại của token (tính bằng giây)
+ * @returns số giây còn lại, -1 nếu token không hợp lệ
+ */
+export const getTokenTimeRemaining = (): number => {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return -1;
+  
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiryTime = payload.exp * 1000; // ms
+    const currentTime = Date.now();
+    const timeRemaining = Math.floor((expiryTime - currentTime) / 1000);
+    
+    return Math.max(0, timeRemaining);
+  } catch (error) {
+    return -1;
+  }
+};
+
+/**
  * Tự động nhận diện loại tài khoản (email/phone)
  * @param input - chuỗi nhập vào
  * @returns 'EMAIL' | 'PHONE'
