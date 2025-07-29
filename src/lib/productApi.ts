@@ -64,30 +64,11 @@ export const productAPI = {
     if (rating !== undefined) url += `&rating=${rating}`;
     return api.get(url);
   },
-};
-
-/**
- * Lấy danh sách tất cả danh mục sản phẩm (public API - không cần auth)
- */
-export const getCategories = async (page = 0, size = 50) => {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/public/categories?page=${page}&size=${size}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
-  }
+  /**
+   * Test API để debug
+   * @returns Promise<AxiosResponse>
+   */
+  testProductsAPI: () => api.get('/products?page=0&size=5'),
 };
 
 /**

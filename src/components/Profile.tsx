@@ -386,10 +386,10 @@ const Profile: React.FC = () => {
       </Typography>
 
       {/* Debug Component - Remove after fixing */}
-      <AvatarDebug 
+      {/* <AvatarDebug 
         avatarUrl={profileData?.avatar} 
         profileData={profileData}
-      />
+      /> */}
 
       <Grid container spacing={3}>
         {/* Thông tin cơ bản */}

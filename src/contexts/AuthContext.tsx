@@ -77,6 +77,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * @returns Promise<boolean> - true nếu token còn hợp lệ, false nếu đã logout
    */
   const checkTokenExpiry = async (): Promise<boolean> => {
+    // Kiểm tra xem có đang ở client-side không
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
     const token = localStorage.getItem('accessToken');
     if (!token) {
       setAuthenticated(false);
@@ -114,6 +119,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    * @returns Promise<boolean> - true nếu refresh thành công, false nếu lỗi
    */
   const refreshToken = async (): Promise<boolean> => {
+    // Kiểm tra xem có đang ở client-side không
+    if (typeof window === 'undefined') {
+      return false;
+    }
+
     const refreshToken = localStorage.getItem('refreshToken');
     if (!refreshToken) {
       logout();
@@ -150,6 +160,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
      * - Luôn set loading = false sau khi kiểm tra
      */
     const checkAuth = async () => {
+      // Kiểm tra xem có đang ở client-side không
+      if (typeof window === 'undefined') {
+        setLoading(false);
+        return;
+      }
+
       const authStatus = isAuthenticated();
       if (authStatus) {
         const isValid = await checkTokenExpiry();
@@ -176,13 +192,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         checkAuth();
       }
     };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    
+    // Chỉ thêm event listener nếu ở client-side
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', handleStorageChange);
+      return () => window.removeEventListener('storage', handleStorageChange);
+    }
   }, []);
 
   // Tự động kiểm tra token mỗi phút
   useEffect(() => {
-    if (!authenticated) return;
+    // Chỉ chạy ở client-side
+    if (typeof window === 'undefined' || !authenticated) return;
     
     const interval = setInterval(async () => {
       await checkTokenExpiry();

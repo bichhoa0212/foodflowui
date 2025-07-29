@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Navbar.module.css';
 import MenuIcon from '@mui/icons-material/Menu';
-import { getCategories } from '../lib/productApi';
-
-interface Category {
-  id: number;
-  name: string;
-  description?: string;
-  imageUrl?: string;
-}
+import { categoryAPI, Category } from '../lib/category';
 
 const Navbar: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -19,9 +12,9 @@ const Navbar: React.FC = () => {
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const response = await getCategories(0, 50);
-        if (response.data && response.data.content) {
-          setCategories(response.data.content);
+        const response = await categoryAPI.getAllCategories();
+        if (response.data && response.data.data) {
+          setCategories(response.data.data);
         }
       } catch (error) {
         console.error('Error fetching categories:', error);

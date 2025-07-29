@@ -86,16 +86,20 @@ export const formatPhoneNumber = (phone: string): string => {
  * @param refreshToken
  */
 export const saveTokens = (accessToken: string, refreshToken: string): void => {
-  localStorage.setItem('accessToken', accessToken);
-  localStorage.setItem('refreshToken', refreshToken);
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('accessToken', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+  }
 };
 
 /**
  * Xóa accessToken và refreshToken khỏi localStorage
  */
 export const clearTokens = (): void => {
-  localStorage.removeItem('accessToken');
-  localStorage.removeItem('refreshToken');
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  }
 };
 
 /**
@@ -103,6 +107,7 @@ export const clearTokens = (): void => {
  * @returns true nếu đã đăng nhập, false nếu chưa
  */
 export const isAuthenticated = (): boolean => {
+  if (typeof window === 'undefined') return false;
   return !!localStorage.getItem('accessToken');
 };
 
@@ -111,6 +116,7 @@ export const isAuthenticated = (): boolean => {
  * @returns object payload hoặc null nếu lỗi
  */
 export const getUserInfo = () => {
+  if (typeof window === 'undefined') return null;
   const token = localStorage.getItem('accessToken');
   if (!token) return null;
   try {
@@ -126,6 +132,7 @@ export const getUserInfo = () => {
  * @returns true nếu token còn hợp lệ, false nếu sắp hết hạn hoặc đã hết hạn
  */
 export const isTokenExpiringSoon = (): boolean => {
+  if (typeof window === 'undefined') return false;
   const token = localStorage.getItem('accessToken');
   if (!token) return false;
   
@@ -147,6 +154,7 @@ export const isTokenExpiringSoon = (): boolean => {
  * @returns true nếu token đã hết hạn, false nếu còn hợp lệ
  */
 export const isTokenExpired = (): boolean => {
+  if (typeof window === 'undefined') return true;
   const token = localStorage.getItem('accessToken');
   if (!token) return true;
   
@@ -166,6 +174,7 @@ export const isTokenExpired = (): boolean => {
  * @returns số giây còn lại, -1 nếu token không hợp lệ
  */
 export const getTokenTimeRemaining = (): number => {
+  if (typeof window === 'undefined') return -1;
   const token = localStorage.getItem('accessToken');
   if (!token) return -1;
   
